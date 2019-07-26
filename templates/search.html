@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Search
+{% endblock %}
+
+{% block main %}
+
+        <h1>Discover a New Favorite Recipe. Try it out!</h1>
+        <h5><i>It's as easy as chooing a cooking time and typing in a few keywords.</i></h5>
+        <br>
+        <form action="/search" method="post">
+            Cooking Time? &nbsp;
+            <select name="time" autofocus>
+                  <option value="5">5 min</option>
+                  <option value="10" selected="selected">10 min</option>
+                  <option value="30">30 min</option>
+                  <option value="60">60 min</option>
+            </select>
+            <br />
+            <br />
+            <div class="form-group">
+                <input autocomplete="off" class="form-control" name="query" placeholder="type any keywords..." type="text">
+            </div>
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+{% endblock %}

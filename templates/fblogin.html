@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+<div class="center">
+    <h3>Python Facebook SDK</h3>
+    <h4>Flask example</h4>
+    <!--removed the following scopes for test app 1: business_management, read_page_mailboxes-->
+    <div class="fb-login-button" data-size='xlarge' data-scope="public_profile,email, pages_messaging, ads_management, ads_read, manage_pages, pages_show_list, leads_retrieval">
+        Continue with Facebook
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "leadadsmaster.html" %}
+
+{% block col2 %}
+      <form action="/leadads_step3" method="post">
+        <div class="container" style="max-width:310px">
+          <h6>Step 1: Create Your Ad.</h6>
+          <div class="form-group">
+            <label for="exampleFormControlTextarea1">Ad Text</label>
+            <textarea class="form-control" id="exampleFormControlTextarea1" name='adtext' rows="3"></textarea>
+          </div>
+          <div class="text-right">
+            <button class="btn btn-primary" type="submit">Continue</button>
+          </div>
+        </div>
+      </form>
+{% endblock %}

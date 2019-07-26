@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Lead Ads
+{% endblock %}
+
+{% block main %}
+<div>
+  <div class="row">
+    <div class="col-sm-3 text-center border p-5">
+      {% block col1 %}{% endblock %}
+      <p> Step 1</p>
+      <p> Step 2</p>
+      <p> Step 3</p>
+      <p> Step 4</p>
+    </div>
+    <div class="col-sm-4 text-center border p-5">
+      {% block col2 %}{% endblock %}
+    </div>
+    <div class="col-sm text-center bg-light shadow p-5">
+      {% block col3 %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

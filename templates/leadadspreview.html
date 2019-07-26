@@ -1,0 +1,14 @@
+{% extends "leadads.html" %}
+
+{% block col3 %}
+      <h6>Your Draft.</h6>
+      <p>Your campaign is not live. Click the button below to publish your ad!</p>
+      <br>
+      <form action="/publishleadads" method="post">
+        <div class='text-right'><button class="btn btn-primary" type="submit">Make My Ad Live!</button></div>
+        <h6>Your Lead Ad.</h6>
+        <iframe src="{{ iframe }}" width="335" height="450" scrolling="yes" style="border: none;"></iframe>
+        <h6>Your Lead Form.</h6>
+        <iframe src="{{ iframe }}" width="335" height="450" scrolling="yes" style="border: none;"></iframe>
+      </form>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+
+    {% if count == 1 %}
+    <h1>You have {{ count }} Lead.</h1>
+    {% else %}
+    <h1>You have {{ count }}</h1>
+    {% endif %}
+
+    <br>
+      <div class="container" style="max-width:800px">
+      <div class="table-responsive">
+        <a href="/preview" class=btn-block id="goback">Get More Leads!</a>
+        <table class="table table-striped table-bordered table-hover" align="center">
+          <caption>List of Your Leads</caption>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <!-- <th>Start Date</th> -->
+            </tr>
+          </thead>
+          <tbody>
+            {% for x in range(count)|reverse %}
+            <tr>
+              <td>{{ rows[x]['full_name'] }}</td>
+              <td>{{ rows[x]['email'] }}</td>
+              <!-- <td>{{ rows[x]['created_at'] }}</td> -->
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      </div>
+      <div>
+          <form action="/deleteleads" method="post">
+            <div><button class="btn btn-light" type="submit">Delete Leads</button>
+            </div>
+          </form>
+      </div>
+{% endblock %}

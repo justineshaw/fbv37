@@ -1,0 +1,7 @@
+#!/Users/justinshaw/code/herokuApps/fbv37/fb37/bin/python3.7
+#
+# Stub script to run jsbeautifier
+#
+import sys
+from jsbeautifier import main
+sys.exit(main())

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- documentation at http://getbootstrap.com/docs/4.1/, alternative themes at https://bootswatch.com/ -->
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+        nav .navbar-brand
+        {
+            /* size for brand */
+            font-size: xx-large;
+        }
+
+        /* colors for table: https://www.w3schools.com/html/html_tables.asp */
+        #c1 {
+          width: 100%;
+          background-color: LightGrey;
+          color: black;
+        }
+
+        #goback
+        {
+            background-color: LightBlue;
+            padding: 10px 0px;
+        }
+
+
+        /* colors for brand */
+        nav .navbar-brand .blue
+        {
+            color: #007bff;
+        }
+        nav .navbar-brand .red
+        {
+            color: #ea433b;
+        }
+        nav .navbar-brand .yellow
+        {
+            color: #f5b82e;
+        }
+        nav .navbar-brand .green
+        {
+            color: #2e944b;
+        }
+
+        main .form-control
+        {
+            /* center form controls */
+            display: inline-block;
+
+            /* override Bootstrap's 100% width for form controls */
+            width: auto;
+        }
+
+        main
+        {
+            /* scroll horizontally as needed */
+            overflow-x: auto;
+
+            /* center contents */
+            text-align: center;
+        }
+
+        main img
+        {
+            /* constrain images on small screens */
+            max-width: 100%;
+        }
+
+        .circle-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 100%;
+            display: block;
+        }
+        </style>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+        <title>Real Leads: {% block title %}{% endblock %}</title>
+
+    </head>
+
+    <body>
+      <script type="text/javascript">
+              window.fbAsyncInit = function() {
+                  FB.init({
+                      appId      : '342529826361699',
+                      status     : true,
+                      cookie     : true,
+                      version    : 'v3.2',
+                      xfbml      : true
+                  });
+                  FB.Event.subscribe('auth.login', function(response) {
+                      window.location = window.location;
+                  });
+              };
+              // Load the SDK Asynchronously
+              (function(d, s, id) {
+                  var js, fjs = d.getElementsByTagName(s)[0];
+                  if (d.getElementById(id)) return;
+                  js = d.createElement(s); js.id = id;
+                  js.src = "//connect.facebook.net/en_US/sdk.js";
+                  fjs.parentNode.insertBefore(js, fjs);
+              }(document, 'script', 'facebook-jssdk'));
+          </script>
+      <!-- Required code snipet for FB login
+      <script type="text/javascript">
+      window.fbAsyncInit = function() {
+        FB.init({
+            appId      : '342529826361699',
+            status     : true,
+            cookie     : true,
+            version    : 'v3.2',
+            xfbml      : true
+        });
+        FB.Event.subscribe('auth.login', function(response) {
+            window.location = window.location;
+        });
+        FB.Event.subscribe('auth.logout', function(response) {
+            window.location = window.location;
+        }); //https://stackoverflow.com/questions/4804032/facebook-logout-button-and-redirect-after-logout
+        FB.Event.subscribe('auth.statusChange', function(response) {
+            window.location = window.location;
+        });
+        };
+
+        function facebookLogin() {
+            FB.login(function(response) {
+                window.location = window.location;
+            }, {scope: 'email, publish_stream, read_friendlists'});
+        }
+        //FB.Event.subscribe('auth.login', function(response) {
+          //  window.location = window.location;
+        //});
+    // Load the SDK Asynchronously
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+    // Load the SDK asynchronously
+    </script>
+
+    End required code snipet for FB login -->
+
+
+
+        <nav class="navbar navbar-expand-md navbar-light bg-light border">
+            <a class="navbar-brand" href="/"><span class=blue>Real <span class=red>Leads</span></a>
+            <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbar">
+                {% if session.user_id %}
+                    <ul class="navbar-nav mr-auto mt-2">
+                        <li class="nav-item"><a class="nav-link" href="/">Leads</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/preview">New Ad</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/ads">Ads Manager</a></li>
+                    </ul>
+                    <ul class="navbar-nav ml-auto mt-2">
+                        <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
+                    </ul>
+                {% else %}
+                    <ul class="navbar-nav ml-auto mt-2">
+                        <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
+                    </ul>
+                {% endif %}
+            </div>
+        </nav>
+
+        {% if get_flashed_messages(category_filter=["error"]) %}
+            <header>
+                <div class="alert alert-warning border text-center alert-dismissible fade show" role="alert">
+                    {{ get_flashed_messages() | join(" ") }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </header>
+        {% endif %}
+        {% if get_flashed_messages(category_filter=["info"]) %}
+            <header>
+                <div class="alert alert-primary border text-center alert-dismissible fade show" role="alert">
+                    {{ get_flashed_messages() | join(" ") }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </header>
+        {% endif %}
+
+        <!--<main class="container p-5">-->
+        <main class="p-5">
+            {% block main %}{% endblock %}
+        </main>
+
+        <footer class="small text-center text-muted">
+            Project is part of <a href="https://developers.facebook.com/docs/marketing-api/buying-api">Facebook Marketing API</a>. View <a href="/terms">our  Terms of Use</a>.
+        </footer>
+
+    </body>
+
+</html>

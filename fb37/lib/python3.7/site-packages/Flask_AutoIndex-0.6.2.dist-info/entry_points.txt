@@ -1,0 +1,3 @@
+[console_scripts]
+fai = flask_autoindex.run:app.run
+

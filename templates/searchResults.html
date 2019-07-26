@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Search Results
+{% endblock %}
+
+{% block main %}
+            <!-- https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_table_basic&stacked=h-->
+          <p>You've selected a maximum cook time of <u>{{ time }} minutes.</u></p>
+
+        <div class="container" style="max-width:700px">
+          <a href="/search" class=btn-block id="goback">Start A New Search</a>
+              <br>
+          <table class="table table-hover" align="center">
+            <thead>
+              <tr>
+                <th align="left" id="c1">Real-Time Search Results</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for i in range(maximum) %}
+                <tr>
+                  <td valign="middle">
+                  <br>
+                  <a href="{{ recipe['hits'][i]['recipe']['url'] }}" target="_blank"><img src="{{ recipe['hits'][i]['recipe']['image'] }}" width="200" height="200"></a>
+                  <br>
+                  <a href="{{ recipe['hits'][i]['recipe']['url'] }}" target="_blank">{{ recipe['hits'][i]['recipe']['label'] }}</a>
+                 <br>
+                 <br>
+                 <form action="/searchResults" method="post"><input type="submit" name="save" value='Save Recipe {{ i+1 }}' class="btn btn-primary"></form>
+                 </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+        </div>
+{% endblock %}

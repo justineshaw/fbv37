@@ -1,0 +1,141 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+
+<!-- Method 2 -->
+<div>
+  <div class="row">
+    <div class="col-sm-2 text-center border p-5">
+      <p> Step 1</p>
+      <p> Step 2</p>
+      <p> Step 3</p>
+      <p> Step 4</p>
+    </div>
+
+    <div class="col-sm-5 text-center border p-5">
+
+
+<form class='was-validated' action="/preview" method="post">
+<div class='container text-center'>
+  <div class='text-right'>
+    <button class="btn btn-primary m-4" type="submit">Update My Preview!</button>
+  </div>
+  <h3>Audience</h3>
+  <div class="form-row">
+
+    <div class="col-md-3 mb-3">
+      <!-- https://getbootstrap.com/docs/4.3/components/input-group/ -->
+        <label for="validationServer01">Daily Budget</label>
+        <select class="custom-select" name="budget" required>
+          <option value="">Select a budget</option>
+          <option value="1">$1</option>
+          <option value="5" selected>$5</option>
+          <option value="20">$20</option>
+        </select>
+        <div class="valid-feedback">Looks good!</div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+      <label for="validationServer01">Duration</label>
+      <select class="custom-select" name="duration" required>
+        <option value="">Select a duration</option>
+        <option value="1">1 Day</option>
+        <option value="3" selected>3 Days</option>
+        <option value="7">7 Days</option>
+      </select>
+      <div class="valid-feedback">Looks good!</div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+      <label for="validationServer01">Ad Account</label>
+      <select class="custom-select" name="adaccount_id" required>
+        <option value="">Select your ad account</option>
+        <option value={{ testdict['adaccount_id'] }} selected>{{ testdict['adaccount_name'] }}</option>
+      </select>
+      <div class="valid-feedback">Looks good!</div>
+    </div>
+
+
+  </div>
+
+
+  <hr>
+  <h3>Ad</h3>
+
+    <div class="form-row">
+
+      <div class="col-md-6 mb-3">
+        <label for="adtext">Ad Text</label>
+        <div class="form-group">
+        <textarea class="form-control" rows="10" id="comment" name='message' data-html="true" placeholder="" value="adlineadline" required>{{ testdict["message"] }}</textarea>
+        <div class="valid-feedback">Looks good!</div>
+        </div>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label for="validationServer01">Headline</label>
+        <input type="text" class="form-control is-valid" id="validationServer01" placeholder="$4XX,XXX!" value={{ testdict["headline"] }} name='headline' required>
+        <div class="valid-feedback">Looks good!</div>
+      </div>
+
+
+    </div>
+
+
+  <hr>
+  <h3>Lead Form</h3>
+
+
+  <label for="validationServer01">Property URL</label>
+   <div class="input-group mb-3">
+     <div class="input-group-prepend">
+       <span class="input-group-text" id="basic-addon3">https://www.</span>
+     </div>
+     <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3" placeholder="yourwebsite.com/123mainst" name='property_url' required value={{ testdict["property_url"] }} >
+     <div class="valid-feedback">Looks good!</div>
+  </div>
+
+    <label for="validationServer01">Privacy Policy URL</label>
+     <div class="input-group mb-3">
+       <div class="input-group-prepend">
+         <span class="input-group-text" id="basic-addon3">https://www.</span>
+       </div>
+       <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3" placeholder="yourwebsite.com/terms" name='privacy_policy_url' required value={{ testdict["privacy_policy_url"] }} >
+       <div class="valid-feedback">Looks good!</div>
+    </div>
+
+<!-- invisible form values -->
+    </form>
+    <div class="invisible">
+      <input type="text" name='id' class="form-control mb-1" value={{ testdict["id"] }}>
+
+    </div>
+
+    <hr>
+  </div>
+
+</div>
+
+    <div class="col-sm text-center bg-light shadow p-5">
+
+        <form action="/ads" method="post">
+          <div class='text-right'><button class="btn btn-primary m-4" type="submit">Publish My Ad!</button>
+          </div>
+          <br>
+          <br>
+          <p>Total Budget: ${{ testdict["budget"] | int * testdict["duration"] | int }}</p>
+          <iframe src="{{ iframe2 }}" width="335" height="450" scrolling="yes" style="border: none;"></iframe>
+          <p>Property Landing Page: <a target="_blank" href={{ "http://www."+testdict["property_url"] }}>link</a></p>
+        </form>
+    </div>
+
+
+  </div>
+</div>
+
+
+{% endblock %}

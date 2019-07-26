@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Ads
+{% endblock %}
+
+{% block main %}
+      <h1>Get More Leads!</h1>
+      <p>Create A New Ad.</p>
+      <br>
+
+      <form action="/ads" method="post">
+        <div class="container" style="max-width:310px">
+          <p>Select Your Ad Account</p>
+          <div class="form-group">
+              <select class="form-control" name="adaccount" autofocus>
+                {% for x in range(count) %}
+                <option value='{{ adaccounts[x]["id"] }}''>{{ adaccounts[x]["name"] }}</option>
+                {% endfor %}
+              </select>
+          </div>
+          <div class="form-group">
+            <label for="exampleFormControlSelect1">Choose an Objective</label>
+            <select class="form-control" name="objective" id="exampleFormControlSelect1">
+              <option value="MESSAGES">Messenger Conversations</option>
+              <option disabled>Website Traffic (coming soon)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="exampleFormControlInput1">Name Your Campaign</label>
+            <input type="text" class="form-control" id="exampleFormControlInput1" name="campname" placeholder="123 Main Street" autofocus>
+          </div>
+          <div class="form-group">
+            <label for="exampleFormControlInput1">Last Thing - Name Your Adset</label>
+            <input type="text" class="form-control" id="exampleFormControlInput2" name="adsetname" placeholder="Live by 123 Main St">
+          </div>
+          <button class="btn btn-primary" type="submit">Create Ad</button>
+        </div>
+      </form>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Ad Results
+{% endblock %}
+
+{% block main %}
+      <h1>Your Facebook Ads.</h1>
+      <p>Your campaign may not appear since it's not live.</p>
+      <br>
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+          <caption>List of Facebook Ads</caption>
+          <thead>
+            <tr>
+              <th>Campaign Name</th>
+              <th>Status</th>
+              <th>Reach</th>
+              <th>Clicks</th>
+              <th>Amount Spent</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for x in range(count) %}
+            <tr>
+              <td><a href="https://business.facebook.com/adsmanager/manage/campaigns/insights?act={{ adsets[x]["account_id"] }}&date={{ adsets[x]["date_start"] }}_{{ adsets[x]["date_stop"] }}&selected_campaign_ids={{ adsets[x]["campaign_id"] }}&columns=name%2Cerrors%2Cdelivery%2Ccampaign_name%2Cbid%2Cbudget%2Clast_significant_edit%2Cresults%2Creach%2Cimpressions%2Ccost_per_result%2Cspend%2Cend_time%2Cschedule%2Crelevance_score%3Ascore&attribution_windows=default
+" class=btn-block target="_blank">{{ adsets[x]["campaign_name"] }}</a></td>
+              <td>Completed</td>
+              <td>{{ adsets[x]["reach"] }}</td>
+              <td>{{ adsets[x]["clicks"] }}</td>
+              <td>${{ adsets[x]["spend"] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+{% endblock %}

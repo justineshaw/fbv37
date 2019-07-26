@@ -1,0 +1,59 @@
+{% extends "leadadsmaster.html" %}
+
+{% block col2 %}
+      <form action="/leadads" method="post">
+        <div class="container" style="max-width:310px">
+
+          <h6>Select Your Ad Account</h6>
+          <div class="form-group">
+              <select class="form-control" name="adaccount" autofocus>
+                {% for x in range(count) %}
+                <option value='{{ adaccounts[x]["id"] }}''>{{ adaccounts[x]["name"] }}</option>
+                {% endfor %}
+              </select>
+          </div>
+
+          <hr>
+
+          <h6>Build Your Audience</h6>
+
+          <hr>
+
+          <h6>Build Your Ad</h6>
+
+          <div class="input-group p-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Your Ad Image:</span>
+            </div>
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="inputGroupFile01" name='adimage'>
+              <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Your Ad Text:</span>
+            </div>
+            <textarea class="form-control" aria-label="With textarea" name='adtext' rows="3"></textarea>
+          </div>
+
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Your Ad Headline:</span>
+            </div>
+            <textarea class="form-control" aria-label="With textarea" name='adheadline' rows="1"></textarea>
+          </div>
+
+          <hr>
+
+          <h6>Build Your Form</h6>
+          <div class='text-right'><button class="btn btn-primary" type="submit">Show Me A Preview!</button></div>
+
+
+        </div>
+      </form>
+{% endblock %}
+{% block col3 %}
+
+{% endblock %}

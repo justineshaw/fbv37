@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+
+    <h1>Welcome, {{ username }}!</h1>
+    <br>
+    <h3>Instantly Search For Recipes</h3>
+    <br>
+    <br>
+    <form action="/search" method="get">
+    <div class="form-group">
+        <input type="submit" value="Get Started!" name="Submit" class="btn btn-primary">
+    </div>
+    </form>
+    <br>
+    <br>
+      <div class="container" style="max-width:700px">
+          <a href="/searchResults" class=btn-block id="goback">Go Back To Your Search</a>
+              <br>
+          <table class="table table-hover" align="center">
+            <thead>
+              <tr>
+                <th align="left" id="c1">Your Saved Recipes</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for x in range(length) %}
+                <tr>
+                  <td valign="middle">
+                  <a href="{{ rows[x]['link'] }}" target="_blank"><img src="{{ rows[x]['image'] }}" width="200" height="200"></a>
+                  <br>
+                  <a href="{{ rows[x]['link'] }}" target="_blank">{{ rows[x]["title"] }}</a>
+                  <br>
+                  <br>
+                  <form action="/" method="post"><input type="submit" name="delete" value='Delete Recipe {{ x+1 }}' class="btn btn-primary"></form>
+
+                  </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+        </div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Ads
+{% endblock %}
+
+{% block main %}
+      <h1>Get More Leads!</h1>
+      <p>Create A New Lead Ad.</p>
+      <br>
+
+      <form action="/leadads" method="post">
+        <div class="container" style="max-width:310px">
+          <p>Select Your Ad Account</p>
+          <div class="form-group">
+              <select class="form-control" name="adaccount" autofocus>
+                {% for x in range(count) %}
+                <option value='{{ adaccounts[x]["id"] }}''>{{ adaccounts[x]["name"] }}</option>
+                {% endfor %}
+              </select>
+          </div>
+          <br>
+          <hr/>
+          <br>
+          <h3>Step 1: Create Your Ad.</h3>
+          <div class="form-group">
+            <label for="exampleFormControlTextarea1">Ad Text</label>
+            <textarea class="form-control" id="exampleFormControlTextarea1" name='adtext' rows="3"></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Create Ad</button>
+        </div>
+      </form>
+{% endblock %}
