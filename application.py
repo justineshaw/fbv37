@@ -70,7 +70,7 @@ from random import randint
 # log in info
 
 app_secret = os.getenv("APP_SECRET")  # os.environ["APP_SECRET"]
-app_id = '342529826361699' #test app #main app: '2446850972202703'  #!!be sure to change web_id in JS SDK in layout.html
+app_id = os.getenv("APP_ID")  #main_all_id:"342529826361699" DEV_ID:"388836281818509"    (!)be sure to also change in layout.html file
 # id = 'act_804097463107225' # Justin Shaw ad account is 'act_804097463107225', test ad account is 'act_255618438702332'
 # page_id:'1775351279446344' # Shaw Marketing page id
 
@@ -1246,7 +1246,7 @@ for code in default_exceptions:
 
 
 if __name__ == '__main__':
- app.debug = False
+ app.debug = True
  port = int(os.environ.get('PORT', 5000))  #getenv  # port = int(os.environ.get('PORT', 5000))
  app.run(host='0.0.0.0', port=port)
  # app.run(host='0.0.0.0', port=8000)
