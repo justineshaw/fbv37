@@ -1244,12 +1244,20 @@ def errorhandler(e):
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
 
+"""
+# try for HTTPS on localhost
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+import ssl
+httpd = HTTPServer(('localhost', 4443), SimpleHTTPRequestHandler)
+httpd.socket = ssl.wrap_socket(httpd.socket, certfile='server_unencrypted.pem', server_side=True)
+httpd.serve_forever()
+"""
 
 if __name__ == '__main__':
- app.debug = False
- port = int(os.environ.get('PORT', 5000))  #getenv  # port = int(os.environ.get('PORT', 5000))
- app.run(host='0.0.0.0', port=port)
- # app.run(host='0.0.0.0', port=8000)
- #app.config['SESSION_TYPE'] = 'filesystem' # https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension
- #Session(app)
- # The session is unavailable because no secret key was set. Set the secret_ key on the application to something unique and secret.
+    port = int(os.environ.get('PORT', 5000))
+    app.run(ssl_context='adhoc', host='0.0.0.0', port=port)
+
+#if __name__ == '__main__':
+#app.debug = False
+#port = int(os.environ.get('PORT', 5000))  #getenv  # port = int(os.environ.get('PORT', 5000))
+#app.run(host='0.0.0.0', port=port)

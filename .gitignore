@@ -1,2 +1,7 @@
 # ignore passwords
 .env
+rootCA.*
+server.*
+v3.ext
+key.pem
+cert.pem
