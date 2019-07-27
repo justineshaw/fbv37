@@ -112,49 +112,6 @@
                   fjs.parentNode.insertBefore(js, fjs);
               }(document, 'script', 'facebook-jssdk'));
           </script>
-      <!-- Required code snipet for FB login
-      <script type="text/javascript">
-      window.fbAsyncInit = function() {
-        FB.init({
-            appId      : '342529826361699',
-            status     : true,
-            cookie     : true,
-            version    : 'v3.2',
-            xfbml      : true
-        });
-        FB.Event.subscribe('auth.login', function(response) {
-            window.location = window.location;
-        });
-        FB.Event.subscribe('auth.logout', function(response) {
-            window.location = window.location;
-        }); //https://stackoverflow.com/questions/4804032/facebook-logout-button-and-redirect-after-logout
-        FB.Event.subscribe('auth.statusChange', function(response) {
-            window.location = window.location;
-        });
-        };
-
-        function facebookLogin() {
-            FB.login(function(response) {
-                window.location = window.location;
-            }, {scope: 'email, publish_stream, read_friendlists'});
-        }
-        //FB.Event.subscribe('auth.login', function(response) {
-          //  window.location = window.location;
-        //});
-    // Load the SDK Asynchronously
-    (function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s); js.id = id;
-        js.src = "https://connect.facebook.net/en_US/sdk.js";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
-    // Load the SDK asynchronously
-    </script>
-
-    End required code snipet for FB login -->
-
-
 
         <nav class="navbar navbar-expand-md navbar-light bg-light border">
             <a class="navbar-brand" href="/"><span class=blue>Real <span class=red>Leads</span></a>
