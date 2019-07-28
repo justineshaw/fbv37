@@ -69,7 +69,7 @@ from random import randint
 
 # log in info
 
-app_secret = os.getenv("APP_SECRET")  # os.environ["APP_SECRET"]
+app_secret = os.getenv("DEV_APP_SECRET_TEST")  # os.environ["APP_SECRET"]
 app_id = os.getenv("APP_ID")  #main_all_id:"342529826361699" DEV_ID:"388836281818509"    (!)be sure to also change in layout.html file
 # id = 'act_804097463107225' # Justin Shaw ad account is 'act_804097463107225', test ad account is 'act_255618438702332'
 # page_id:'1775351279446344' # Shaw Marketing page id
@@ -129,7 +129,9 @@ def after_request(response):
 app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
+
+app.secret_key = os.urandom(24) # encrypt session storage -> https://www.youtube.com/watch?v=T1ZVyY1LWOg
+Session(app) # initiate a flask session
 
 @app.route("/deleteleads", methods=["GET", "POST"])
 def deleteleads():
@@ -502,7 +504,7 @@ def terms():
 
 @app.before_request
 def get_current_user():
-    print("@@running get_current_user@@")
+    print("running get_current_user method - line 500")
 
     if session.get("user"):
         g.user = session.get("user")
@@ -514,8 +516,8 @@ def get_current_user():
     result = get_user_from_cookie(
         cookies=request.cookies, app_id=FB_APP_ID, app_secret=FB_APP_SECRET
     )
-    print("result:")
-    print(result)
+    #print("result:")
+    #print(result)
 
     if result: # only runs if facebook login returns a result (i.e. user is logged in)
 
@@ -572,7 +574,7 @@ def get_current_user():
     if g.user:
         print(g.user) # the following don't work - print(g.user["access_token"]) || print(g.user.access_token)
     if not g.user:
-        print("@@no g.user@@")
+        print("no g.user results from get_current_user method")
     return
 
 @app.route("/", methods=["GET", "POST"])
@@ -1045,18 +1047,21 @@ def ads():
             print(session['adaccount'])
             return redirect("/adresults")
     else:
-        print("@@@@@@ g.user @@@@@")
-        print(g.user)
+        print("running ads method")
+        #print(g.user)
         if not session.get("user"): # since user is not logged in, prompt them to login
+            print("no 'session user' during call to ads method")
             return render_template("fblogin.html", app_id=FB_APP_ID)
         elif session.get("user"): # user is logged in
         #try:
             user_id = g.user['user_id']
-            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+            print("there is a 'session user' during the call to ads method")
             print(user_id)
             access_token = g.user['access_token']
             print(access_token)
             FacebookAdsApi.init(access_token=access_token)
+
+            '''
             # get users ad accounts using the user_id and access_token above
             fields = [
                 'name',
@@ -1073,6 +1078,10 @@ def ads():
             count = len(adaccounts)
             print("rendering template ads.html")
             return render_template("ads.html", user=g.user, adaccounts=adaccounts, count=count)
+            '''
+            print("redirect from /ads to /preview")
+            return redirect("/preview")
+
 
 
 @app.route("/adresults", methods=["GET", "POST"])
@@ -1254,6 +1263,7 @@ httpd.serve_forever()
 """
 
 if __name__ == '__main__':
+    app.debug = False
     port = int(os.environ.get('PORT', 5000))
     app.run(ssl_context='adhoc', host='0.0.0.0', port=port)
 
