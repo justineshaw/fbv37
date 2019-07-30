@@ -90,19 +90,23 @@
     </head>
 
     <body>
-      <script type="text/javascript">
+        <script type="text/javascript">
+
               window.fbAsyncInit = function() {
+
                   FB.init({
                       appId      : '388836281818509',
                       status     : true,
-                      cookie     : true,
-                      version    : 'v3.2',
+                      cookie     : true, // enable cookies to allow the server to access the session
+                      version    : 'v3.2', // The Graph API version to use for the call
                       xfbml      : true
                   });
+
                   FB.Event.subscribe('auth.login', function(response) {
                       window.location = window.location;
                   });
               };
+
               // Load the SDK Asynchronously
               (function(d, s, id) {
                   var js, fjs = d.getElementsByTagName(s)[0];
@@ -111,7 +115,8 @@
                   js.src = "//connect.facebook.net/en_US/sdk.js";
                   fjs.parentNode.insertBefore(js, fjs);
               }(document, 'script', 'facebook-jssdk'));
-          </script>
+
+        </script>
 
         <nav class="navbar navbar-expand-md navbar-light bg-light border">
             <a class="navbar-brand" href="/"><span class=blue>Real <span class=red>Leads</span></a>
