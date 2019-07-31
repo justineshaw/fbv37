@@ -71,8 +71,8 @@ env_path = Path('.gitignore') / '.env'
 load_dotenv(dotenv_path=env_path)
 
 # set app secret and app id
-FB_APP_SECRET = os.getenv("DEV_APP_SECRET_TEST")
-FB_APP_ID = os.getenv("DEV_APP_ID")  # (!)be sure to also change the app id in layout.html file
+FB_APP_SECRET = os.getenv("APP_SECRET")
+FB_APP_ID = os.getenv("APP_ID")  # (!)be sure to also change the app id in layout.html file
 
 # acess the app's heroku database locally
 # https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python
