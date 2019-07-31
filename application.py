@@ -117,10 +117,12 @@ def get_current_user():
         return
 
     # Attempt to get the short term access token for the current user.
-    result = get_user_from_cookie(
-        cookies=request.cookies, app_id=FB_APP_ID, app_secret=FB_APP_SECRET
-    )
-
+    result = None;
+    if request.cookies:
+        result = get_user_from_cookie(
+            cookies=request.cookies, app_id=FB_APP_ID, app_secret=FB_APP_SECRET
+        )
+        
     # if there is no result, we assume the user is not logged into facebook
     if result:
         print("inside if result")
