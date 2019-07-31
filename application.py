@@ -125,6 +125,9 @@ def get_current_user():
         cookies=request.cookies, app_id=FB_APP_ID, app_secret=FB_APP_SECRET
     )
 
+    # see if user already has access_token for elif statement below
+    rows = db.execute("SELECT * FROM users WHERE id = :id", id=session["id"])
+
     # if there is no result, we assume the user is not logged into facebook
     if result:
         print("inside if result")
@@ -167,6 +170,7 @@ def get_current_user():
             # add existing facebook user (id and access code) to current logged in person using id or user_name
             print("old access token: " + str(user[0]["access_token"]))
 
+
         # Add the user to the current session
         if user:
             print("inside if user")
@@ -177,8 +181,17 @@ def get_current_user():
                 access_token=user[0]["access_token"],
             )
 
-        # If there is no result, we assume the user is not logged in and set g.user to None
-    # Commit changes to the database and set the user as a global g.user
+    # If there is no result, we check if user is logging in from new computer
+    elif rows[0]['access_token'] != None:
+        print("inside user has an account and is on new device")
+        session["user"] = dict(
+            name=rows[0]["name"],
+            profile_url=rows[0]["profile_url"],
+            user_id=rows[0]["user_id"],
+            access_token=rows[0]["access_token"],
+        )
+
+    # we assume the user is not logged in and set g.user to None or log in and set equal to user
     g.user = session.get("user", None)
 
     print("at end of get_current_user method")
