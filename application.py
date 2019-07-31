@@ -100,6 +100,7 @@ Session(app)
 sslify = SSLify(app)
 
 @app.before_request
+@login_required
 def get_current_user():
     """Set g.user to the currently logged in user.
     Called before each request, get_current_user sets the global g.user
