@@ -138,7 +138,7 @@ def deleteleads():
     db.execute("DELETE FROM leads WHERE page_id='1775351279446344'")
     return redirect("/")
 
-@app.route("/preview", methods=["GET", "POST"])
+@app.route("/generate_preview_1", methods=["GET", "POST"])
 def preview():
 
     # hardcode so don't have to login

@@ -25,7 +25,7 @@ except ImportError:  # else revert to python 2
      from urlparse import urlparse
 #import urllib.parse
 
-from helpers import apology, login_required, extend
+from helpers import apology, login_required, extend, get_page_access_token
 import psycopg2 # import to use postgreSQL as database in python applications
 
 from facebook_business.api import FacebookAdsApi
@@ -113,9 +113,6 @@ def get_current_user():
     if session.get("user"):
         print("inside of session.get(user)")
         g.user = session.get("user")
-        if session.get('id'):
-            print("id: " + str(session["id"]))
-            db.execute("INSERT INTO users (access_token) VALUES (:access) WHERE user_id = :uid", access=session["user"]["access_token"], uid = session["user"]["id"])
         print("end get_current_user early b/c there is a user in session")
         return
 
@@ -172,7 +169,7 @@ def get_current_user():
             session["user"] = dict(
                 name=user[0]["name"],
                 profile_url=user[0]["profile_url"],
-                id=user[0]["user_id"],
+                user_id=user[0]["user_id"],
                 access_token=user[0]["access_token"],
             )
 
@@ -268,18 +265,10 @@ def login():
             flash('Invalid Username and/or Password', 'error')
             return redirect("/login")
 
-        # Remember which user has logged in via a global variable
-        #global userId
-        #id = rows[0]["id"]
-        #print("userId: " + str(userId))
-
         # Remember which user has logged in via sessions
         session["id"] = rows[0]["id"]
         print("id: " + str(session["id"]))
 
-        # need to access the first row of the array rows, row[0] and then go to the index cash, ["cash"]
-
-        # Redirect user to home page
         return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
@@ -306,140 +295,337 @@ def index():
         message = "Get Leads!!"
     return render_template("index.html", message=FB_APP_ID)
 
-@app.route("/create_lead_ad", methods=["GET", "POST"])
+# get page_access_token to user during ad creation
+
+@app.route("/lead_ad_generator", methods=["GET", "POST"])
 @login_required
-def create_lead_ad():
+def lead_ad_generator():
     # set rows equal to current user row in 'users' table
-    rows = db.execute("SELECT * FROM users WHERE id = :id",  # returns an array
-                      id=session["id"])
+    rows = db.execute("SELECT * FROM users WHERE id = :id", id=session["id"])
 
-    # if user does not have a valid access token, redirect to facebook login page
+    # if user does not have a valid access token, redirect to facebook login page; othwerise, launch lead_ad_generator
     if rows[0]["access_token"] is None:
-        print("no 'acess_token' found during call to create_lead_ad method")
+        print("no 'acess_token' found during call to lead_ad_generator method")
         return render_template("fblogin.html", app_id=FB_APP_ID)
-    return "lead ad template goes here"
-
-@app.route("/ads", methods=["GET", "POST"])
-#@login_required
-def ads():
-    print("running ads method")
-    if request.method == "POST":
-        if request.form.get("campname"):
-            flash('Must provide a Name for your Campaign and Adset', 'error')
-            return render_template("ads.html")
-        elif request.form.get("adsetname"):
-            flash('Must provide a Name for your Campaign and Adset', 'error')
-            return render_template("ads.html")
-        else:
-        #try:
-            # get user inputs
-            objective = request.form.get("objective")
-            print(objective)
-            campname = request.form.get("campname")
-            print(campname)
-            adsetname = request.form.get("adsetname")
-            print(adsetname)
-            adaccount = 'act_804097463107225'
-            print(adaccount)
-
-            #create campaign
-            fields = [
-            ]
-            params ={
-                'name': 'test campaign',
-                'objective': 'LEAD_GENERATION',
-                'status': "PAUSED",
-            }
-            newcampaign = AdAccount(adaccount).create_campaign(
-                fields=fields,
-                params=params,
-            )
-            print(newcampaign)
-
-            session['adaccount'] = adaccount
-            print(session['adaccount'])
-            return redirect("/adresults")
     else:
-        if not session.get("user"): # since user is not logged in, prompt them to login
-            print("no 'session user' during call to ads method")
-            return render_template("fblogin.html", app_id=FB_APP_ID)
-        elif session.get("user"): # user is logged in
-        #try:
-            user_id = g.user['user_id']
-            print("there is a 'session user' during the call to ads method")
-            print(user_id)
-            access_token = g.user['access_token']
-            print(access_token)
-            FacebookAdsApi.init(access_token=access_token)
 
-            '''
-            # get users ad accounts using the user_id and access_token above
-            fields = [
-                'name',
-            ]
-            params = {
-            }
-            adaccounts = (User(user_id).get_ad_accounts(  # assuming id is the user_id
-              fields=fields,
-              params=params,
-            ))
-            #id = adaccounts[0]["id"]
-            #print("id")
-            #print(id)
-            count = len(adaccounts)
-            print("rendering template ads.html")
-            return render_template("ads.html", user=g.user, adaccounts=adaccounts, count=count)
-            '''
-            print("redirect from /ads to /preview")
-            return redirect("/preview")
+        # create object and pass access_token and latest version as parameters
+        FacebookAdsApi.init(access_token=g.user['access_token'], api_version='v3.3')
 
+        # Get users pages
+        fields = [
+            'name',
+        ]
+        params = {
+        }
+        pages = User(g.user['user_id']).get_accounts(
+          fields=fields,
+          params=params,
+        )
+        page_count = len(pages)
 
-@app.route("/adresults", methods=["GET", "POST"])
-#@login_required
-def adresults():
+        # get users ad accounts
+        FacebookAdsApi.init(access_token=g.user['access_token'], api_version='v3.3')
+        fields = [
+            'name',
+        ]
+        params = {
+        }
+        ad_accounts = User(g.user['user_id']).get_ad_accounts(  # assuming id is the user_id
+          fields=fields,
+          params=params,
+        )
+        ad_account_count = len(ad_accounts)
+
+        return render_template("lead_ad_generator.html", user=g.user, pages=pages, adaccounts=ad_accounts, ad_account_count=ad_account_count, page_count=page_count)
+
+@app.route('/lead_ad_process_1', methods=['POST'])
+def lead_ad_process_1():
+    print("in /lead_ad_process_1")
+    headline = request.form['headline']
+    ad_account = request.form['ad_account']
+
     '''
-    adaccount = session['adaccount'] # https://stackoverflow.com/questions/17057191/redirect-while-passing-arguments
-    adpreview = session['adpreview'] # retrieved from /leadads
+    # given page id, determine page access token
+    graph = GraphAPI(access_token=g.user['access_token'])
+    data = graph.get_object("/" + str(ad_account) + "?fields=access_token") # get_object(self, id, **args):
+    page_access_token = data['access_token']
+    '''
+
+    return jsonify({'headline' : headline, 'ad_account' : ad_account})
+
+@app.route('/process', methods=['POST'])
+def process():
+
+    phone = request.form['phone']
+    name = request.form['name']
+    email = request.form['email']
+
+    if name and email:
+        newName = name[::-1]
+
+        return jsonify({'name' : phone})
+
+    return jsonify({'error' : 'Missing data!'})
+
+'''
+# add new info to API
+@app.route('/process_2', methods=['POST'])
+def process_1():
+    print("in /process_2")
+    headline = request.form['headline']
+    print("headline: " + str(headline))
+    lead_ad_preview = preview(); # set lead_ad_preview variable equal to return of preview() method
+    return jsonify({'headline' : headline, 'lead_ad_preview' : lead_ad_preview})
+'''
+
+@app.route('/preview', methods=['GET'])
+def preview():
+
+    # hardcode so don't have to login
+    user_access_token = session["user"]["access_token"]
+    page_access_token = os.getenv("TEST_PAGE_ACCESS_TOKEN")
+    FacebookAdsApi.init(access_token=page_access_token)
+
+    print("inside /preview")
+
+    # if user just typed in URL, run scraper
+    if not request.form.get("budget"):
+        print("running if not budget request")
+
+        city = request.form.get('city')
+        print(city)
+
+        # add necessary values to dict -- added to database table as default
+        ad_details = {
+          "page_id": "1775351279446344",
+          "adaccount_id": 'act_804097463107225',
+          'adaccount_name': 'Justin Shaw',
+            "lead_gen_form_id": "",
+            "privacy_policy_url": "soldoncharleston.com/terms",
+            "property_url": "soldoncharleston.com/property/19004415",
+            "budget": 5,
+            "duration": 3
+        }
+
+
+        # global testdict
+        #property_details = scraper(request.form.get('query_address')) # call the scraper function with the query_address
+        property_details = {
+            'query_address': '1315 Center Lake Drive',   # request.form.get('query_address'),
+            'query_city': 'MOUNT PLEASANT',  #request.form.get('query_city').upper(),
+            'beds': '3',
+            'baths': '2.5',
+            'sqft': '1500',
+            'price': '$400,000',
+            'scraped_address': '1315 Center Lake Drive, Mount Pleasant, SC 29464',
+            'scraped_image': 'https://t.realgeeks.media/thumbnail/LSsbogr5NtKyMMN5PUUqjiVv98w=/trim:top-left:50/https://property-media.realgeeks.com/101/40de1f38333c75fe778e90a32241050b.jpg',
+        }
+
+        '''
+        # hash user inputted image
+        fields = [
+        ]
+        params ={
+            'filename': '/Users/justinshaw/Documents/code/herokuApps/fbapp01/static/image1.jpeg', # /image1.jpeg,
+            'parent_id': ad_details['adaccount_id'],
+        }
+        image = AdImage(ad_details['adaccount_id']).api_create(
+            parent_id=ad_details['adaccount_id'],
+            params=params,
+        )
+        print(image)
+        hash = image['hash']
+        '''
+        # instead of hashing user inputted photo, hardcode a photo from test account
+        hash = '3c57436a2eb2c2e887241086c8aa226f'
+
+
+        # add more necessary values to dict that require manipulation
+        property_details.update ({
+            'headline': '2XX,XXX!',
+            'message': "\N{FIRE}" + ' Hot ' + property_details['query_city'] + ' area listing ' + "\N{FIRE}!!" + '\n\nBEDS: ' + property_details['beds'] + '\nBATHS: ' + property_details['baths'] + '\nSQ FT: ' + property_details['sqft'] + '\n\nTo see the price, location, and more pictures, tap "Learn More"',
+            "image_hash": "3c57436a2eb2c2e887241086c8aa226f", # returned from above function
+        })
+
+
+        #test1 = db.execute("INSERT INTO ads (query_address, query_city, price, beds, baths, sqft, scraped_address, scraped_image) VALUES (:query_address, :query_city, :price, :beds, :baths, :sqft, :scraped_address, :scraped_image)",
+                    #query_address=property_details['query_address'], query_city=property_details['query_city'], price=property_details['price'], beds=property_details['beds'], baths=property_details['baths'], sqft=property_details['sqft'], scraped_address=property_details['scraped_address'], scraped_image=property_details['scraped_image'])
+        #test2 = db.execute("INSERT INTO ads (query_address, query_city, price, beds, baths, sqft, scraped_address, scraped_image, message, headline, image_hash) VALUES (:query_address, :query_city, :price, :beds, :baths, :sqft, :scraped_address, :scraped_image, :message, :headline, :image_hash)",
+                    #query_address=property_details['query_address'], query_city=property_details['query_city'], price=property_details['price'], beds=property_details['beds'], baths=property_details['baths'], sqft=property_details['sqft'], scraped_address=property_details['scraped_address'], scraped_image=property_details['scraped_image'], message=property_details['message'], headline=property_details['headline'], image_hash=property_details['image_hash'])
+        test3 = db.execute("INSERT INTO ads (query_address, query_city, price, beds, baths, sqft, scraped_address, scraped_image, message, headline, image_hash, page_id, adaccount_id, adaccount_name, lead_gen_form_id, privacy_policy_url, property_url) VALUES (:query_address, :query_city, :price, :beds, :baths, :sqft, :scraped_address, :scraped_image, :message, :headline, :image_hash, :page_id, :adaccount_id, :adaccount_name, :lead_gen_form_id, :privacy_policy_url, :property_url)",
+                    query_address=property_details['query_address'], query_city=property_details['query_city'], price=property_details['price'], beds=property_details['beds'], baths=property_details['baths'], sqft=property_details['sqft'], scraped_address=property_details['scraped_address'], scraped_image=property_details['scraped_image'], message=property_details['message'], headline=property_details['headline'], image_hash=property_details['image_hash'], page_id=ad_details['page_id'], adaccount_id=ad_details['adaccount_id'], adaccount_name=ad_details['adaccount_name'], lead_gen_form_id=ad_details['lead_gen_form_id'], privacy_policy_url=ad_details['privacy_policy_url'], property_url=ad_details['property_url'])
+
+    # if user is updating preview, just update the database
+    if request.form.get("budget"): # update the database
+        print("running if budget")
+        print("updating database!")
+        # update database
+        #test3 = db.execute("INSERT INTO ads (budget, duration, adaccount_id, headline, message, property_url, privacy_policy_url) VALUES (:budget, :duration, :adaccount_id, :headline, :message, :property_url, :privacy_policy_url)",
+                    #budget = request.form.get("budget"), duration= request.form.get("duration"), adaccount_id = request.form.get("adaccount_id"), headline = request.form.get("headline"), message = request.form.get("adtext"), property_url = request.form.get("property_url"), privacy_policy_url = request.form.get("privacy_policy_url"))
+        #test3 = db.execute("INSERT INTO ads (query_address, query_city, price, beds, baths, sqft, scraped_address, scraped_image, message, headline, image_hash, page_id, adaccount_id, adaccount_name, lead_gen_form_id, privacy_policy_url, property_url) VALUES (:query_address, :query_city, :price, :beds, :baths, :sqft, :scraped_address, :scraped_image, :message, :headline, :image_hash, :page_id, :adaccount_id, :adaccount_name, :lead_gen_form_id, :privacy_policy_url, :property_url)",
+                    #query_address=property_details['query_address'], query_city=property_details['query_city'], price=property_details['price'], beds=property_details['beds'], baths=property_details['baths'], sqft=property_details['sqft'], scraped_address=property_details['scraped_address'], scraped_image=property_details['scraped_image'], message=property_details['message'], headline=property_details['headline'], image_hash=property_details['image_hash'], page_id=ad_details['page_id'], adaccount_id=ad_details['adaccount_id'], adaccount_name=ad_details['adaccount_name'], lead_gen_form_id=ad_details['lead_gen_form_id'], privacy_policy_url=ad_details['privacy_policy_url'], property_url=ad_details['property_url'])
+        ad_details = {
+            'budget': request.form.get('budget'),
+            'duration': request.form.get('duration'),
+            'adaccount_id': request.form.get('adaccount_id'),
+            'message': request.form.get('message'),
+            'headline': request.form.get('headline'),
+            'property_url': request.form.get('property_url'),
+            'privacy_policy_url': request.form.get('privacy_policy_url'),
+        }
+        print(ad_details)
+
+        id = request.form.get('id') # get id of column in ads tables
+        print(id)
+
+        ad = db.execute("SELECT * FROM ads WHERE id= :id", id=id)
+        db.execute("UPDATE ads SET budget = :budget, duration = :duration, adaccount_id = :adaccount_id, message = :message, headline = :headline, privacy_policy_url = :privacy_policy_url, property_url = :property_url WHERE id = :id", budget = ad_details['budget'], duration = ad_details['duration'], adaccount_id = ad_details['adaccount_id'], message = ad_details['message'], headline = ad_details['headline'], privacy_policy_url = ad_details['privacy_policy_url'], property_url =
+                    ad_details['property_url'], id = id)
+        print(ad)
+        test3 = id
+        print(test3)
+
+    # generate preview - call variables from database
+    ad = db.execute("SELECT * FROM ads WHERE id= :id", id=test3) # retrieve user info from database to later store in session
+    ad = ad[0]
+    print(ad['message'])
+
+
+    # generate leads ad w/ status draft
+    print("running preview")
+    fields = [
+    ]
+    params = {  #  these fields can be found in under the page reference: https://developers.facebook.com/docs/graph-api/reference/page/
+      'name': ad['message'],
+      'follow_up_action_url': ad['property_url'],
+      'question_page_custom_headline': 'question page title',
+      'questions': [
+          {
+            "key": "budget?",
+            "label": "Budget?",
+            "options": [
+              {
+                "key": "under_300k",
+                "value": "under 300k"
+              },
+              {
+                "key": "300k-600k",
+                "value": "300k-600k"
+              },
+              {
+                "key": "over_700k",
+                "value": "over 700k"
+              }
+            ],
+            "type": "CUSTOM"
+          },
+          {
+            "key": "when_do_you_want_keys_to_your_home?",
+            "label": "When Do You Want Keys To Your Home?",
+            "options": [
+              {
+                "key": "within_3_months",
+                "value": "Within 3 months"
+              },
+              {
+                "key": "3-6months",
+                "value": "3-6months"
+              },
+              {
+                "key": "more_than_6_months",
+                "value": "More than 6 Months"
+              }
+            ],
+            "type": "CUSTOM"
+          },
+          {
+            "key": "email",
+            "type": "EMAIL",
+          },
+          {
+            "key": "full_name",
+            "type": "FULL_NAME",
+          }
+          ],
+      'privacy_policy': {'url': ad['privacy_policy_url'], 'link_text': 'privacy'}, # https://developers.facebook.com/docs/graph-api/reference/page/
+
+    "thank_you_page": {
+      "title": "Great! You're All Set.",
+      "body": "One of our agents will be in touch to help you customize your home search! Tap below to view the location, price, and more pictures!",
+      "button_text": "SEE THE INSIDE!!",
+      "enable_messenger": False,
+      "button_type": "VIEW_WEBSITE",
+      "website_url": ad['property_url'],
+      },
+     # "leadgen_tos_accepted": True
+    }
+
+    params['name'] = params['name'] + str(randint(100, 999)) #add one to the form name so it's always unique
+
+    page_access_token = os.getenv("TEST_PAGE_ACCESS_TOKEN")
+    print('@@@@@@@@@@page_access_token@@@@@@@@@@@@')
+    print(page_access_token)
+    FacebookAdsApi.init(access_token=page_access_token)
+
+    lead_gen_form = Page(ad['page_id']).create_lead_gen_form( # must use page_access_token
+      fields=fields,
+      params=params,
+    )
+
+    # update lead_form_id in database
+    db.execute("INSERT INTO ads (lead_gen_form_id) VALUES (:lead_gen_form_id)",
+               lead_gen_form_id=lead_gen_form['id'])
+    # generate ad preview
+    # pass values to HTML
+
+    # METHOD 2: generate an ad preview from a non-existing ad: https://developers.facebook.com/docs/marketing-api/generatepreview/v3.2
+    # two steps: (1) create an object_story_spec and (2) use the gen_generate_previews function from the user's ad account node
+    #print("method 2:")
+    params1 = {
+        'object_story_spec': {
+            'page_id': ad['page_id'],
+            'link_data': {
+                'message': ad['message'],
+                'link': 'http://fb.me/',
+                'image_hash': ad['image_hash'],
+                'name': ad['headline'],
+                #'caption':'WWW.ITUNES.COM',
+                #'description':'The link description',
+                #'title': adheadline,
+                'call_to_action': {
+                    'type':'LEARN_MORE',
+                    'value': {
+                        'link':'http://fb.me/',
+                        'lead_gen_form_id': lead_gen_form['id']
+                    }
+                }
+            }
+        },
+    }
+
+    params = {
+        'creative': params1, # how to use a creative spec? https://developers.facebook.com/docs/marketing-api/reference/ad-creative
+        'ad_format': 'MOBILE_FEED_STANDARD',
+        }
+    adpreview = AdAccount(ad['adaccount_id']).get_generate_previews(params=params)
+
+
+    # now that we have the ad preview, get <iframe> to display on html page
+    adpreview = adpreview[0]['body']
     soup = BeautifulSoup(adpreview, 'html5lib')
-    iframe = soup.find_all('iframe')[0]['src']
-    print(iframe)
-    print(adaccount)
-    '''
-    adaccount = 'act_804097463107225'
+    iframe2 = soup.find_all('iframe')[0]['src']
 
-    if request.method == "POST":
-        pass
-    else:
-        if 1==1:
-            fields = [ # see "adinsights.py" class "AdInsights" for fields since that's that the fxn references
-              'campaign_name',
-              'reach',
-              'clicks',
-              'spend',
-              'account_id',
-              'date_start',
-              'date_stop',
-              'campaign_id',
-            ]
-            params = { # /act_804097463107225/insights?fields=ad_id,impressions&date_preset=lifetime&level=ad
-              'date_preset': 'lifetime',
-              'level': 'campaign',
-            }
-            adsets = (AdSet(adaccount).get_insights( # https://developers.facebook.com/docs/marketing-api/insights
-              fields=fields,
-              params=params,
-            ))
+    # try to get a preview
+    fields = [
+    ]
+    params = {
+        'creative': 'creative', # how to use a creative spec? https://developers.facebook.com/docs/marketing-api/reference/ad-creative
+        'ad_format': 'MOBILE_FEED_STANDARD',
+        }
 
-            print(adsets)
-            count = len(adsets)
+    return render_template("showpreview.html", iframe2=iframe2, testdict=ad)
 
-        return render_template("adresults.html", adsets=adsets, count=count)
-
-@app.route("/terms", methods=["GET", "POST"])
-def terms():
-    print("##### terms/logout ######")
-    session.pop("user", None)
-    return render_template("terms.html", user=g.user)
 
 def errorhandler(e):
     """Handle error"""
@@ -451,21 +637,7 @@ def errorhandler(e):
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
 
-"""
-# try for HTTPS on localhost
-from http.server import HTTPServer, SimpleHTTPRequestHandler
-import ssl
-httpd = HTTPServer(('localhost', 4443), SimpleHTTPRequestHandler)
-httpd.socket = ssl.wrap_socket(httpd.socket, certfile='server_unencrypted.pem', server_side=True)
-httpd.serve_forever()
-"""
-
 if __name__ == '__main__':
     app.debug = False
     port = int(os.environ.get('PORT', 5000))
     app.run(ssl_context='adhoc', host='0.0.0.0', port=port)
-
-#if __name__ == '__main__':
-#app.debug = False
-#port = int(os.environ.get('PORT', 5000))  #getenv  # port = int(os.environ.get('PORT', 5000))
-#app.run(host='0.0.0.0', port=port)
