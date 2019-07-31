@@ -12,7 +12,7 @@ import sqlalchemy
 from flask import g, Flask, flash, jsonify, redirect, render_template, request, session
 from flask_session import Session
 
-# from flask_talisman import Talisman
+
 from cs50 import SQL
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
@@ -44,7 +44,10 @@ from facebook_business.adobjects.leadgenformpreviewdetails import LeadGenFormPre
 import facebook
 from facebook import get_user_from_cookie, GraphAPI
 
-from flask_sslify import SSLify
+# import libraries to force HTTPS redirect
+#from flask_sslify import SSLify
+from flask_talisman import Talisman
+
 from bs4 import BeautifulSoup # webscraper
 
 #from send_sms import send_sms
@@ -94,6 +97,8 @@ app.secret_key = os.urandom(24) # https://www.youtube.com/watch?v=T1ZVyY1LWOg
 
 # initiate a flask session dictionary
 Session(app)
+#sslify = SSLify(app)
+Talisman(app)
 
 @app.before_request
 def get_current_user():
@@ -117,12 +122,10 @@ def get_current_user():
         return
 
     # Attempt to get the short term access token for the current user.
-    result = None;
-    if request.cookies:
-        result = get_user_from_cookie(
-            cookies=request.cookies, app_id=FB_APP_ID, app_secret=FB_APP_SECRET
-        )
-        
+    result = get_user_from_cookie(
+        cookies=request.cookies, app_id=FB_APP_ID, app_secret=FB_APP_SECRET
+    )
+
     # if there is no result, we assume the user is not logged into facebook
     if result:
         print("inside if result")
