@@ -45,8 +45,8 @@ import facebook
 from facebook import get_user_from_cookie, GraphAPI
 
 # import libraries to force HTTPS redirect
-#from flask_sslify import SSLify
-from flask_talisman import Talisman
+from flask_sslify import SSLify
+# from flask_talisman import Talisman -> Messes up CSS/styling
 
 from bs4 import BeautifulSoup # webscraper
 
@@ -97,8 +97,7 @@ app.secret_key = os.urandom(24) # https://www.youtube.com/watch?v=T1ZVyY1LWOg
 
 # initiate a flask session dictionary
 Session(app)
-#sslify = SSLify(app)
-Talisman(app)
+sslify = SSLify(app)
 
 @app.before_request
 def get_current_user():
