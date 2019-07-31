@@ -100,7 +100,6 @@ Session(app)
 sslify = SSLify(app)
 
 @app.before_request
-@login_required
 def get_current_user():
     """Set g.user to the currently logged in user.
     Called before each request, get_current_user sets the global g.user
@@ -113,87 +112,89 @@ def get_current_user():
 
     print("At start of get_current_user method")
 
-    # Set the user in the session dictionary as a global g.user and bail out
-    # of this function early.
-    if session.get("user"):
-        print("inside of session.get(user)")
-        g.user = session.get("user")
-        print("end get_current_user early b/c there is a user in session")
-        return
+    if session.get("id") is not None:
 
-    # Attempt to get the short term access token for the current user.
-    result = get_user_from_cookie(
-        cookies=request.cookies, app_id=FB_APP_ID, app_secret=FB_APP_SECRET
-    )
+        # Set the user in the session dictionary as a global g.user and bail out
+        # of this function early.
+        if session.get("user"):
+            print("inside of session.get(user)")
+            g.user = session.get("user")
+            print("end get_current_user early b/c there is a user in session")
+            return
 
-    # see if user already has access_token for elif statement below
-    rows = db.execute("SELECT * FROM users WHERE id = :id", id=session["id"])
-
-    # if there is no result, we assume the user is not logged into facebook
-    if result:
-        print("inside if result")
-
-        # extend access token
-        result["access_token"] = extend(result["access_token"], FB_APP_ID, FB_APP_SECRET)
-
-        # Check to see if this Facebook user_id is already in our database.
-        print("uid: " + str(result["uid"])) # facebook user id: 1139085602941741 <- business id? It's under business integerations
-        user = db.execute("SELECT * FROM users WHERE user_id = :uid", uid = result["uid"])
-        print("user: " + str(user)) # row 23
-
-        # It's the 1st time user is logging in, so create a user and add them to current row in database by id
-        if not user:
-            print("inside if not user[0]")
-            # Not an existing user so get info
-            graph = GraphAPI(result["access_token"])
-            profile = graph.get_object("me")
-            if "link" not in profile:
-                profile["link"] = ""
-
-            # Create the user and insert it into the database
-            #print("profile_url: " + profile["link"])
-            #print("profile_id: " + str(profile["id"]))
-            #print("name: " + str(profile["name"]))
-            if session.get('id'):
-                print("id: " + str(session["id"]))
-                db.execute("UPDATE users SET user_id = :uid, access_token = :access, profile_url = :profile, name = :name WHERE id = :id",
-                               uid=str(profile["id"]), access=result["access_token"], profile=profile["link"], id = session["id"], name = profile["name"]) # returns unique "id" of the user
-            #print("user: " + str(user))
-
-        elif user[0]["access_token"] != result["access_token"]:
-            print("inside user[0][accesstoken] != result[access_token]")
-
-            # If an existing user, update the access token
-            print("old access token: " + str(user[0]["access_token"]))
-            print("new access token: " + str(result["access_token"]))
-            db.execute("UPDATE users SET access_token = :access WHERE user_id = :uid",
-                               access=result["access_token"], uid = result["uid"])
-            # add existing facebook user (id and access code) to current logged in person using id or user_name
-            print("old access token: " + str(user[0]["access_token"]))
-
-
-        # Add the user to the current session
-        if user:
-            print("inside if user")
-            session["user"] = dict(
-                name=user[0]["name"],
-                profile_url=user[0]["profile_url"],
-                user_id=user[0]["user_id"],
-                access_token=user[0]["access_token"],
-            )
-
-    # If there is no result, we check if user is logging in from new computer
-    elif rows[0]['access_token'] != None:
-        print("inside user has an account and is on new device")
-        session["user"] = dict(
-            name=rows[0]["name"],
-            profile_url=rows[0]["profile_url"],
-            user_id=rows[0]["user_id"],
-            access_token=rows[0]["access_token"],
+        # Attempt to get the short term access token for the current user.
+        result = get_user_from_cookie(
+            cookies=request.cookies, app_id=FB_APP_ID, app_secret=FB_APP_SECRET
         )
 
-    # we assume the user is not logged in and set g.user to None or log in and set equal to user
-    g.user = session.get("user", None)
+        # see if user already has access_token for elif statement below
+        rows = db.execute("SELECT * FROM users WHERE id = :id", id=session["id"])
+
+        # if there is no result, we assume the user is not logged into facebook
+        if result:
+            print("inside if result")
+
+            # extend access token
+            result["access_token"] = extend(result["access_token"], FB_APP_ID, FB_APP_SECRET)
+
+            # Check to see if this Facebook user_id is already in our database.
+            print("uid: " + str(result["uid"])) # facebook user id: 1139085602941741 <- business id? It's under business integerations
+            user = db.execute("SELECT * FROM users WHERE user_id = :uid", uid = result["uid"])
+            print("user: " + str(user)) # row 23
+
+            # It's the 1st time user is logging in, so create a user and add them to current row in database by id
+            if not user:
+                print("inside if not user[0]")
+                # Not an existing user so get info
+                graph = GraphAPI(result["access_token"])
+                profile = graph.get_object("me")
+                if "link" not in profile:
+                    profile["link"] = ""
+
+                # Create the user and insert it into the database
+                #print("profile_url: " + profile["link"])
+                #print("profile_id: " + str(profile["id"]))
+                #print("name: " + str(profile["name"]))
+                if session.get('id'):
+                    print("id: " + str(session["id"]))
+                    db.execute("UPDATE users SET user_id = :uid, access_token = :access, profile_url = :profile, name = :name WHERE id = :id",
+                                   uid=str(profile["id"]), access=result["access_token"], profile=profile["link"], id = session["id"], name = profile["name"]) # returns unique "id" of the user
+                #print("user: " + str(user))
+
+            elif user[0]["access_token"] != result["access_token"]:
+                print("inside user[0][accesstoken] != result[access_token]")
+
+                # If an existing user, update the access token
+                print("old access token: " + str(user[0]["access_token"]))
+                print("new access token: " + str(result["access_token"]))
+                db.execute("UPDATE users SET access_token = :access WHERE user_id = :uid",
+                                   access=result["access_token"], uid = result["uid"])
+                # add existing facebook user (id and access code) to current logged in person using id or user_name
+                print("old access token: " + str(user[0]["access_token"]))
+
+
+            # Add the user to the current session
+            if user:
+                print("inside if user")
+                session["user"] = dict(
+                    name=user[0]["name"],
+                    profile_url=user[0]["profile_url"],
+                    user_id=user[0]["user_id"],
+                    access_token=user[0]["access_token"],
+                )
+
+        # If there is no result, we check if user is logging in from new computer
+        elif rows[0]['access_token'] != None:
+            print("inside user has an account and is on new device")
+            session["user"] = dict(
+                name=rows[0]["name"],
+                profile_url=rows[0]["profile_url"],
+                user_id=rows[0]["user_id"],
+                access_token=rows[0]["access_token"],
+            )
+
+        # we assume the user is not logged in and set g.user to None or log in and set equal to user
+        g.user = session.get("user", None)
 
     print("at end of get_current_user method")
 
