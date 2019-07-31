@@ -354,6 +354,65 @@ def lead_ad_process_1():
 
     return jsonify({'headline' : headline, 'ad_account' : ad_account})
 
+
+@app.route('/lead_ad_step_2', methods=['POST'])
+def lead_ad_step_2():
+    print("in /lead_ad_step_2")
+    ad_account = request.form['ad_account']
+    page = request.form['page']
+
+    # generate preview src
+    # hardcode so don't have to login
+    user_access_token = session["user"]["access_token"]
+    page_access_token = os.getenv("TEST_PAGE_ACCESS_TOKEN")
+    FacebookAdsApi.init(access_token=page_access_token)
+
+    print("inside /preview")
+
+    # METHOD 2: generate an ad preview from a non-existing ad: https://developers.facebook.com/docs/marketing-api/generatepreview/v3.2
+    # two steps: (1) create an object_story_spec and (2) use the gen_generate_previews function from the user's ad account node
+
+    # get an image hash to use for ad by reading from ad accounts existing images
+    account = AdAccount(ad_account)
+    images = account.get_ad_images()
+
+    params_object = {
+        'object_story_spec': {
+            'page_id': page,
+            'link_data': {
+                'message': "message",
+                'link': 'http://fb.me/',
+                'image_hash': images[0]["hash"], # two options to get hash: (1) upload an image or (2) read from existing images
+                'name': "headline",
+                #'caption':'WWW.ITUNES.COM',
+                #'description':'The link description',
+                #'title': adheadline,
+                'call_to_action': {
+                    'type':'LEARN_MORE',
+                    'value': {
+                        'link':'http://fb.me/',
+                        #'lead_gen_form_id': lead_gen_form['id']
+                    }
+                }
+            }
+        },
+    }
+    params = {
+        'creative': params_object, # how to use a creative spec? https://developers.facebook.com/docs/marketing-api/reference/ad-creative
+        'ad_format': 'MOBILE_FEED_STANDARD',
+        }
+    FacebookAdsApi.init(access_token=g.user['access_token'], api_version='v3.3')
+    data = AdAccount(ad_account).get_generate_previews(params=params)
+
+    # now that we have the ad preview, get <iframe> to display on html page
+    data = data[0]['body']
+    soup = BeautifulSoup(data, 'html5lib')
+    iframe = soup.find_all('iframe')[0]['src']
+    print(iframe)
+
+    # return src to html page
+    return jsonify({'iframe' : iframe})
+
 @app.route('/process', methods=['POST'])
 def process():
 
