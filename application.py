@@ -358,35 +358,26 @@ def lead_ad_generator():
 
         return render_template("lead_ad_generator.html", user=g.user, pages=pages, adaccounts=ad_accounts, ad_account_count=ad_account_count, page_count=page_count)
 
-@app.route('/lead_ad_process_1', methods=['POST'])
-def lead_ad_process_1():
-    print("in /lead_ad_process_1")
-    headline = request.form['headline']
-    ad_account = request.form['ad_account']
-
-    '''
-    # given page id, determine page access token
-    graph = GraphAPI(access_token=g.user['access_token'])
-    data = graph.get_object("/" + str(ad_account) + "?fields=access_token") # get_object(self, id, **args):
-    page_access_token = data['access_token']
-    '''
-
-    return jsonify({'headline' : headline, 'ad_account' : ad_account})
-
-
-@app.route('/lead_ad_step_2', methods=['POST'])
-def lead_ad_step_2():
-    print("in /lead_ad_step_2")
+@app.route('/get_preview', methods=['POST'])
+def get_preview():
+    print("in /get_preview")
     ad_account = request.form['ad_account']
     page = request.form['page']
+    headline = request.form['headline']
+    text = request.form['text']
 
+    print("0")
+    privacy_policy : request.form['privacy_policy']
+    url : request.form['url']
+    budget : request.form['budget']
+    print("1")
     # generate preview src
     # hardcode so don't have to login
     user_access_token = session["user"]["access_token"]
     page_access_token = os.getenv("TEST_PAGE_ACCESS_TOKEN")
     FacebookAdsApi.init(access_token=page_access_token)
 
-    print("inside /preview")
+    print("2")
 
     # METHOD 2: generate an ad preview from a non-existing ad: https://developers.facebook.com/docs/marketing-api/generatepreview/v3.2
     # two steps: (1) create an object_story_spec and (2) use the gen_generate_previews function from the user's ad account node
@@ -395,14 +386,15 @@ def lead_ad_step_2():
     account = AdAccount(ad_account)
     images = account.get_ad_images()
 
+    print("3")
     params_object = {
         'object_story_spec': {
             'page_id': page,
             'link_data': {
-                'message': "message",
+                'message': text,
                 'link': 'http://fb.me/',
                 'image_hash': images[0]["hash"], # two options to get hash: (1) upload an image or (2) read from existing images
-                'name': "headline",
+                'name': headline,
                 #'caption':'WWW.ITUNES.COM',
                 #'description':'The link description',
                 #'title': adheadline,
@@ -416,19 +408,22 @@ def lead_ad_step_2():
             }
         },
     }
+    print("4")
     params = {
         'creative': params_object, # how to use a creative spec? https://developers.facebook.com/docs/marketing-api/reference/ad-creative
         'ad_format': 'MOBILE_FEED_STANDARD',
         }
     FacebookAdsApi.init(access_token=g.user['access_token'], api_version='v3.3')
+    print("5")
     data = AdAccount(ad_account).get_generate_previews(params=params)
-
+    print("6")
     # now that we have the ad preview, get <iframe> to display on html page
     data = data[0]['body']
     soup = BeautifulSoup(data, 'html5lib')
     iframe = soup.find_all('iframe')[0]['src']
     print(iframe)
 
+    print("end /preview")
     # return src to html page
     return jsonify({'iframe' : iframe})
 
@@ -718,4 +713,5 @@ for code in default_exceptions:
 if __name__ == '__main__':
     app.debug = False
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port) # app.run(ssl_context='adhoc', host='0.0.0.0', port=port)
+    # app.run(host='0.0.0.0', port=port) # production mode
+    app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode

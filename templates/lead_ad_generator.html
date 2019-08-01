@@ -2,18 +2,18 @@
 
 {% block col1 %}
 
-<h6>Select Your Ad Account and Page</h6>
-<div class="container" id="lead_ad_generator_form_1" style="display:block;">
+<div class="container py-5" id="lead_ad_generator_form_1" style="display:none;">
+    <h6>Select Your Ad Account and Page</h6>
     <form class="lead_ad_generator_form_1">
         <div class="form-group">
-            <select id="ad_account" class="lead_ad" name="adaccount" autofocus>
+            <select id="ad_account" class="lead_ad" name="adaccountInput" autofocus>
               {% for x in range(ad_account_count) %}
               <option value='{{ adaccounts[x]["id"] }}''>{{ adaccounts[x]["name"] }}</option>
               {% endfor %}
             </select>
         </div>
         <div class="form-group">
-            <select id="page" class="lead_ad" name="page" autofocus>
+            <select id="page" class="lead_ad" name="pageInput" autofocus>
               {% for x in range(page_count) %}
               <option value='{{ pages[x]["id"] }}''>{{ pages[x]["name"] }}</option>
               {% endfor %}
@@ -22,13 +22,46 @@
     </form>
 </div>
 
-<div class="container" id="lead_ad_generator_form_2" style="display:none;">
-    <h6>Customize Your Ad</h6>
+<div class="container py-5" id="lead_ad_generator_form_2" style="display:none;">
+    <h6>Customize Your Lead Ad</h6>
     <form class="lead_ad_generator_form_2">
         <div class="form-group">
               <label class="sr-only" for="headline">Headline</label>
-              <input type="text" class="form-control" id="headlineInput" placeholder="Headline">
+              <input type="text" class="form-control" id="headline" placeholder="Headline" value="View All Pics, See Inside & Get Price">
         </div>
+        <div class="form-group">
+              <label class="sr-only" for="text">Text</label>
+              <textarea id="text" class="form-control" aria-label="With textarea" name='adtext' rows="9">&#128293; NEW [CITY] area listing!! &#128293; &#13;&#13;BEDS: [BEDS] &#13;BATHS: [BATHS] &#13;SQ FT: [SQFT]&#13;&#13;&#127968;&#128273;&#127968;&#128273;&#127968;&#128273;&#13;&#13;To see the price, location, and more pictures, tap "Learn More"</textarea>
+              <!-- &#128293; NEW [CITY] area listing!! &#128293; &#13;BEDS: [BEDS] &#13;BATHS: [BATHS] &#13;SQ FT: [SQFT]&#13;&#13;&#127968;&#128273;&#127968;&#128273;&#127968;&#128273;&#13;&#13;To see the price, location, and more pictures, tap "Learn More" -->
+        </div>
+        <div class="form-group">
+              <label class="sr-only" for="image">Image</label>
+              <input type="text" class="form-control" id="image" placeholder="Image">
+        </div>
+    </form>
+</div>
+
+<div class="container py-5" id="lead_ad_generator_form_3" style="display:none;">
+    <h6>Finish Your Lead Ad</h6>
+    <form class="lead_ad_generator_form_3">
+            <div class="form-group">
+                  <!-- https://getbootstrap.com/docs/4.3/components/input-group/ -->
+                    <label for="validationServer01">Budget</label>
+                    <select id="budget" class="custom-select" name="budget" required>
+                      <option value="5">$5</option>
+                      <option value="20" selected>$20</option>
+                      <option value="50">$50</option>
+                    </select>
+                    <div class="valid-feedback">Looks good!</div>
+            </div>
+            <div class="form-group">
+                  <label class="sr-only" for="privacyPolicy">Privacy Policy</label>
+                  <input type="text" class="form-control" id="privacy_policy" placeholder="Privacy Policy" value="LinkToTheProperty.com/PrivacyPolicy">
+            </div>
+            <div class="form-group">
+                  <label class="sr-only" for="url">Url</label>
+                  <input type="text" class="form-control" id="url" placeholder="url" value="LinkToTheProperty.com">
+            </div>
     </form>
 </div>
 
@@ -36,8 +69,8 @@
 
 {% block col2 %}
 <div class="container" id="lead_ad_generator_1" style="display:block;">
-    <p id="headline">...</p>
-    <p>Your Lead Ad Here.</p>
+    <!-- <p id="iframe">...</p> -->
     <iframe id="lead_ad_preview" src="" width="335" height="450" scrolling="yes" style="border: none;"></iframe>
+
 </div>
 {% endblock %}
