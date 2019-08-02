@@ -2,7 +2,7 @@
 
 {% block col1 %}
 
-<div class="container py-5" id="lead_ad_generator_form_1" style="display:none;">
+<div class="container py-5" id="lead_ad_generator_form_1" style="display:block;">
     <h6>Select Your Ad Account and Page</h6>
     <form class="lead_ad_generator_form_1">
         <div class="form-group">
@@ -58,19 +58,37 @@
                   <label class="sr-only" for="privacyPolicy">Privacy Policy</label>
                   <input type="text" class="form-control" id="privacy_policy" placeholder="Privacy Policy" value="LinkToTheProperty.com/PrivacyPolicy">
             </div>
-            <div class="form-group">
+            <div id="lead_ad_generator_form_3_url" class="form-group">
                   <label class="sr-only" for="url">Url</label>
                   <input type="text" class="form-control" id="url" placeholder="url" value="LinkToTheProperty.com">
             </div>
     </form>
 </div>
 
+<div class="container py-5" id="lead_ad_generator_email_notifications" style="display:none;">
+    <h6>What's your best email to get new lead notifications?</h6>
+    <!-- trigger python /set_email function to add email to database and return home page -->
+    <form action="/set_email" method="post" class="lead_ad_generator_email_notifications">
+        <div class="form-group">
+          <label for="exampleInputEmail1">Email address</label>
+          <input type="email" name="email" class="form-control form-control-sm" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="SendMeLeads@gmail.com">
+          <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+        </div>
+        <!-- trigger python function to add email to database and return home page -->
+        <button class="btn btn-primary" type="submit">Send Me Leads!</button>
+    </form>
+</div>
+
 {% endblock %}
 
 {% block col2 %}
-<div class="container" id="lead_ad_generator_1" style="display:block;">
+<div class="container" id="lead_ad_preview_div" style="display:block;">
     <!-- <p id="iframe">...</p> -->
-    <iframe id="lead_ad_preview" src="" width="335" height="450" scrolling="yes" style="border: none;"></iframe>
-
+    <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;"></div>
+    <div id="successAlert" class="alert alert-success" role="alert" style="display:none;">Your ad succesfully published!</div>
+    <iframe id="lead_ad_preview" src="https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif" width="335" height="450" scrolling="yes" style="border:none;"></iframe>
+    <div id="publish_lead_ad_button_div" class="row justify-content-center" style="display:none;">
+        <input id="publish_lead_ad_button" class="btn btn-primary" type="submit" value="Publish Lead Ad" disabled>
+    </div>
 </div>
 {% endblock %}
