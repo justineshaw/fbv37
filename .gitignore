@@ -9,3 +9,5 @@ leadgen_tos_accepted.py
 get_image_hash.py
 get_valid_location.py
 lead_ad_targeting.py
+fblogin-driver.py
+templates/v1-fblogin.html

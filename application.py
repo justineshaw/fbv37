@@ -89,91 +89,87 @@ app.secret_key = os.urandom(24) # https://www.youtube.com/watch?v=T1ZVyY1LWOg
 Session(app)
 sslify = SSLify(app)
 
+'''the goal is to store a g.user in client storage; then, we can use if g.user throughout app to determine if we have valid access_token for user'''
 @app.before_request
 def get_current_user():
-    """Set g.user to the currently logged in user.
-    Called before each request, get_current_user sets the global g.user
-    variable to the currently logged in user.
 
-    A currently logged in user is determined by seeing if it exists in Flask's session dictionary.
-        If it is the first time the user is logging into this application it will create the user and insert it into the database.
-    If the user is not logged in, None will be set to g.user.
-    """
-
-    print("At start of get_current_user method")
+    print("start")
 
     if session.get("id") is not None:
 
         # Set the user in the session dictionary as a global g.user and bail out
         # of this function early.
         if session.get("user"):
-            print("inside of session.get(user)")
+            print("revisit")
             g.user = session.get("user")
-            print("end get_current_user early b/c there is a user in session")
+            print(g.user)
+            print("got g.user from session[user]!")
             return
 
         # Attempt to get the short term access token for the current user.
         result = get_user_from_cookie(
             cookies=request.cookies, app_id=FB_APP_ID, app_secret=FB_APP_SECRET
         )
+        print("result: " + str(result))
+        # result: none - means there are no cookies from fb so user is not logged into fb
 
-        # see if user already has access_token for elif statement below
-        rows = db.execute("SELECT * FROM users WHERE id = :id", id=session["id"])
+#?      # see if user already has access_token for elif statement below
+        #rows = db.execute("SELECT * FROM users WHERE id = :id", id=session["id"])
 
         # if there is no result, we assume the user is not logged into facebook
         if result:
-            print("inside if result")
+            print("logged in")
 
-            # extend access token
-            result["access_token"] = extend(result["access_token"], FB_APP_ID, FB_APP_SECRET)
-
-            # Check to see if this Facebook user_id is already in our database.
-            print("uid: " + str(result["uid"])) # facebook user id: 1139085602941741 <- business id? It's under business integerations
+            # Check to see if there is already a row in database with that  user is already in FB by using result from cookie parsing
+            # test id is '1139085602941741'
             user = db.execute("SELECT * FROM users WHERE user_id = :uid", uid = result["uid"])
-            print("user: " + str(user)) # row 23
+            if user: # can delete when I understand more fully
+                print("fb id in db: ")
+                print(result["uid"])
 
-            # It's the 1st time user is logging in, so create a user and add them to current row in database by id
+            # user's fb id is not in db so get thier fbid and access token and add to the row associated with their app id
             if not user:
-                print("inside if not user[0]")
-                # Not an existing user so get info
+                print("first fb login")
                 graph = GraphAPI(result["access_token"])
                 profile = graph.get_object("me")
                 if "link" not in profile:
                     profile["link"] = ""
 
-                # Create the user and insert it into the database
-                #print("profile_url: " + profile["link"])
-                #print("profile_id: " + str(profile["id"]))
-                #print("name: " + str(profile["name"]))
-                if session.get('id'):
-                    print("id: " + str(session["id"]))
-                    db.execute("UPDATE users SET user_id = :uid, access_token = :access, profile_url = :profile, name = :name WHERE id = :id",
-                                   uid=str(profile["id"]), access=result["access_token"], profile=profile["link"], id = session["id"], name = profile["name"]) # returns unique "id" of the user
-                #print("user: " + str(user))
+                # update database entry that exists for currently logged in user to store their fb info
+                #if session.get('id'):
+                db.execute("UPDATE users SET user_id = :uid, access_token = :access, profile_url = :profile, name = :name WHERE id = :id",
+                           uid=str(profile["id"]), access=result["access_token"], profile=profile["link"], name = profile["name"], id = session["id"]) # returns unique "id" of the user
 
             elif user[0]["access_token"] != result["access_token"]:
-                print("inside user[0][accesstoken] != result[access_token]")
+            # fb user is already in fb but new access_token does not match with one on file, so update
+                print("app user, " + str(session["id"])  + ", HAS logged in w/ fb before but access_token is old so we've updated")
 
                 # If an existing user, update the access token
                 print("old access token: " + str(user[0]["access_token"]))
                 print("new access token: " + str(result["access_token"]))
+
+                # extend new access token
+                result["access_token"] = extend(result["access_token"], FB_APP_ID, FB_APP_SECRET)
+
                 db.execute("UPDATE users SET access_token = :access WHERE user_id = :uid",
                                    access=result["access_token"], uid = result["uid"])
-                # add existing facebook user (id and access code) to current logged in person using id or user_name
-                print("old access token: " + str(user[0]["access_token"]))
 
+            # else if statement to handle users with multiple app accounts (i.e. have many rows in db)
 
-            # Add the user to the current session
-            if user:
-                print("inside if user")
-                session["user"] = dict(
-                    name=user[0]["name"],
-                    profile_url=user[0]["profile_url"],
-                    user_id=user[0]["user_id"],
-                    access_token=user[0]["access_token"],
-                )
+            # store user in session
+            #if user:
+            # select the user based on app_id so we can add them to a session
+            user = db.execute("SELECT * FROM users WHERE id = :app_id", app_id = session["id"])
+
+            session["user"] = dict(
+                name=user[0]["name"],
+                profile_url=user[0]["profile_url"],
+                user_id=user[0]["user_id"],
+                access_token=user[0]["access_token"],
+            )
 
         # If there is no result, we check if user is logging in from new computer
+        '''
         elif rows[0]['access_token'] != None:
             print("inside user has an account and is on new device")
             session["user"] = dict(
@@ -182,9 +178,10 @@ def get_current_user():
                 user_id=rows[0]["user_id"],
                 access_token=rows[0]["access_token"],
             )
-
+        '''
         # we assume the user is not logged in and set g.user to None or log in and set equal to user
         g.user = session.get("user", None)
+        print(g.user)
 
     print("at end of get_current_user method")
 
@@ -309,11 +306,13 @@ def index():
 @app.route("/lead_ad_generator", methods=["GET", "POST"])
 @login_required
 def lead_ad_generator():
-    # set rows equal to current user row in 'users' table
+    print("inside lead_ad_generator")
+
     rows = db.execute("SELECT * FROM users WHERE id = :id", id=session["id"])
 
     # if user does not have a valid access token, redirect to facebook login page; othwerise, launch lead_ad_generator
-    if rows[0]["access_token"] is None:
+    # if there is no access token, user has not logged in
+    if not g.user:
         print("no 'acess_token' found during call to lead_ad_generator method")
         return render_template("fblogin.html", app_id=FB_APP_ID)
     else:
@@ -697,5 +696,8 @@ for code in default_exceptions:
 if __name__ == '__main__':
     app.debug = False
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port) # production mode
-    #app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode
+    # production mode
+    # app.run(host='0.0.0.0', port=port)
+
+    # development mode
+    app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode
