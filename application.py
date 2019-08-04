@@ -151,8 +151,8 @@ def get_current_user():
                 # extend new access token
                 result["access_token"] = extend(result["access_token"], FB_APP_ID, FB_APP_SECRET)
 
-                db.execute("UPDATE users SET access_token = :access WHERE user_id = :uid",
-                                   access=result["access_token"], uid = result["uid"])
+                db.execute("UPDATE users SET access_token = :access WHERE id = :id",
+                                   access=result["access_token"], id = session["id"])
 
             # else if statement to handle users with multiple app accounts (i.e. have many rows in db)
 
@@ -442,7 +442,8 @@ def publish_ad():
             return jsonify({'tos_accepted' : False})
 
         # initialize variables used during ad creation
-        ad_account = 'act_804097463107225' #hardcode to prevent publishing to bobs account # request.form['ad_account'] # set ad_account equal to user selected ad_account
+        # ad_account = 'act_804097463107225' #hardcode to prevent publishing to bobs account # request.form['ad_account'] # set ad_account equal to user selected ad_account
+        ad_account = request.form['ad_account'] # set ad_account equal to user selected ad_account
         url = request.form['url']
         privacy_policy = "https://fbapp0111.herokuapp.com/terms"  # what if app users could all use the same privacy policy that I host on the app
         message = request.form['text']
