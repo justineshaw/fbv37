@@ -1,7 +1,6 @@
 
 # heroku URL: https://fbapp0111.herokuapp.com/
 
-
 # access environment variables via dotenv library: https://pypi.org/project/python-dotenv/
 from dotenv import load_dotenv
 from pathlib import Path  # python3 only
@@ -9,9 +8,9 @@ from pathlib import Path  # python3 only
 import os
 import sqlalchemy
 
-from flask import g, Flask, flash, jsonify, redirect, render_template, request, session
+import json
+from flask import g, Flask, flash, jsonify, redirect, render_template, request, session, make_response, Response
 from flask_session import Session
-
 
 from cs50 import SQL
 from tempfile import mkdtemp
@@ -25,46 +24,38 @@ except ImportError:  # else revert to python 2
      from urlparse import urlparse
 #import urllib.parse
 
-from helpers import apology, login_required, extend, get_page_access_token
+from helpers import login_required, extend, get_page_access_token
 import psycopg2 # import to use postgreSQL as database in python applications
-
-from facebook_business.api import FacebookAdsApi
-from facebook_business.adobjects.user import User
-from facebook_business.adobjects.campaign import Campaign
-from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.adobjects.adset import AdSet
-from facebook_business.adobjects.adsinsights import AdsInsights
-from facebook_business.adobjects.leadgenform import LeadgenForm
-from facebook_business.adobjects.adcreative import AdCreative
-from facebook_business.adobjects.adpreview import AdPreview
-from facebook_business.adobjects.adimage import AdImage
-from facebook_business.adobjects.page import Page
-from facebook_business.adobjects.lead import Lead
-from facebook_business.adobjects.leadgenformpreviewdetails import LeadGenFormPreviewDetails
-import facebook
-from facebook import get_user_from_cookie, GraphAPI
 
 # import libraries to force HTTPS redirect
 from flask_sslify import SSLify
-# from flask_talisman import Talisman -> Messes up CSS/styling
 
 from bs4 import BeautifulSoup # webscraper
 
 #from send_sms import send_sms
 from scraper import scraper
 
-from facebook_business.adobjects.adcreative import AdCreative
-from facebook_business.adobjects.adpreview import AdPreview
-from facebook_business.api import FacebookAdsApi
-
-
-from facebook_business.adobjects.adcreative import AdCreative
-from facebook_business.adobjects.adpreview import AdPreview
-from facebook_business.api import FacebookAdsApi
-from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.adobjects.page import Page
-
+from datetime import datetime, timedelta
 from random import randint
+
+import facebook # helps with facebook login
+from facebook import get_user_from_cookie, GraphAPI
+
+from facebook_business.api import FacebookAdsApi
+from facebook_business.adobjects.adcreative import AdCreative
+from facebook_business.adobjects.adpreview import AdPreview
+from facebook_business.adobjects.adaccount import AdAccount
+from facebook_business.adobjects.adimage import AdImage
+from facebook_business.adobjects.adsinsights import AdsInsights
+from facebook_business.adobjects.adset import AdSet
+from facebook_business.adobjects.campaign import Campaign
+from facebook_business.exceptions import FacebookError, FacebookRequestError
+from facebook_business.adobjects.leadgenform import LeadgenForm
+from facebook_business.adobjects.lead import Lead
+from facebook_business.adobjects.leadgenformpreviewdetails import LeadGenFormPreviewDetails
+from facebook_business.adobjects.page import Page
+from facebook_business.adobjects.targetingsearch import TargetingSearch
+from facebook_business.adobjects.user import User
 
 # set path to environment variables
 env_path = Path('.gitignore') / '.env'
@@ -75,8 +66,7 @@ FB_APP_SECRET = os.getenv("APP_SECRET")
 FB_APP_ID = os.getenv("APP_ID")  # (!)be sure to also change the app id in layout.html file
 
 # acess the app's heroku database locally
-# https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python
-# https://stackoverflow.com/questions/45133831/heroku-cant-launch-python-flask-app-attributeerror-function-object-has-no
+# references: https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python; https://stackoverflow.com/questions/45133831/heroku-cant-launch-python-flask-app-attributeerror-function-object-has-no
 urllib.parse.uses_netloc.append("postgres")
 url = urllib.parse.urlparse(os.getenv("DATABASE_URL"))
 db = SQL(os.environ["DATABASE_URL"]) # os.environ["APP_SECRET"]
@@ -314,7 +304,7 @@ def index():
         message = "Get Leads!!"
     return render_template("index.html", message=FB_APP_ID)
 
-# get page_access_token to user during ad creation
+# get page_access_token to user during ad creation?
 
 @app.route("/lead_ad_generator", methods=["GET", "POST"])
 @login_required
@@ -358,74 +348,328 @@ def lead_ad_generator():
 
         return render_template("lead_ad_generator.html", user=g.user, pages=pages, adaccounts=ad_accounts, ad_account_count=ad_account_count, page_count=page_count)
 
+# get_location from user inputted string
+# see get_valid_location.py for reference
+@app.route('/get_locations', methods=['POST'])
+def get_location():
+    location_query = request.form['location_query']
+
+    # reference: https://developers.facebook.com/docs/marketing-api/targeting-search#geo
+    params = {
+        'q': location_query,
+        'type': 'adgeolocation',
+        'location_types': ['city'], # only city results
+        'limit': 5,
+        "country_code": "US", # only search results from US
+    }
+    FacebookAdsApi.init(access_token=g.user['access_token'], api_version='v3.3')
+    data = TargetingSearch.search(params=params)
+
+    list = []
+    for i in range(len(data)):
+        #{'name':"Charleston, SC, United States", 'type': 'city'}
+        str = data[i]["name"] + ", " + data[i]["region"] + ", " + data[i]["country_code"]
+        list.append({'name' : str, 'type': data[i]["type"], 'key' : data[i]["key"]})
+
+    return jsonify(list)
+
 @app.route('/get_preview', methods=['POST'])
 def get_preview():
-    print("in /get_preview")
+
+    # gather all necessary variables
     ad_account = request.form['ad_account']
     page = request.form['page']
     headline = request.form['headline']
     text = request.form['text']
-
-    print("0")
     privacy_policy = request.form['privacy_policy']
     url = request.form['url']
     budget = request.form['budget']
-    print("1")
-    # generate preview src
-    # hardcode so don't have to login
-    user_access_token = session["user"]["access_token"]
-    page_access_token = os.getenv("TEST_PAGE_ACCESS_TOKEN")
-    FacebookAdsApi.init(access_token=page_access_token)
+    image_url = request.form['image']
 
-    print("2")
-
-    # METHOD 2: generate an ad preview from a non-existing ad: https://developers.facebook.com/docs/marketing-api/generatepreview/v3.2
-    # two steps: (1) create an object_story_spec and (2) use the gen_generate_previews function from the user's ad account node
-
-    # get an image hash to use for ad by reading from ad accounts existing images # two options to get hash: (1) upload an image or (2) read from existing images
-    account = AdAccount(ad_account)
-    images = account.get_ad_images()
-
-    print("3")
+    # generate preview
+    # reference on generating an ad preview from a non-existing ad: https://developers.facebook.com/docs/marketing-api/generatepreview/v3.2
     params_object = {
         'object_story_spec': { # https://developers.facebook.com/docs/marketing-api/reference/ad-creative-object-story-spec/
             'page_id': page,
             'link_data': { # https://developers.facebook.com/docs/marketing-api/reference/ad-creative-link-data/
                 'message': text,
                 'link': url, # must be same as 'link' in 'CTA' below
-                'image_hash': images[0]["hash"],
+                #'image_hash': images[0]["hash"],
+                'picture': image_url,
                 'name': headline,
                 'call_to_action': { # https://developers.facebook.com/docs/marketing-api/reference/ad-creative-link-data-call-to-action/
                     'type':'LEARN_MORE',
                     'value': {
                         'link': url,
-                        #'lead_gen_form_id': lead_gen_form['id']
                     }
                 }
             }
         },
     }
-    print("4")
     params = {
         'creative': params_object, # how to use a creative spec? https://developers.facebook.com/docs/marketing-api/reference/ad-creative
         'ad_format': 'MOBILE_FEED_STANDARD',
         }
-    FacebookAdsApi.init(access_token=g.user['access_token'], api_version='v3.3')
-    print("5")
     data = AdAccount(ad_account).get_generate_previews(params=params)
-    print("6")
+
     # now that we have the ad preview, get <iframe> to display on html page
-    data = data[0]['body']
-    soup = BeautifulSoup(data, 'html5lib')
+    soup = BeautifulSoup(data[0]['body'], 'html5lib')
     iframe = soup.find_all('iframe')[0]['src']
-    print(iframe)
-    print("end /preview")
     return jsonify({'iframe' : iframe})
 
+# given the relevant values, publish a lead ad to a user selected ad account and page
 @app.route('/publish_ad', methods=['POST'])
 def publish_ad():
-    error = ""
-    return jsonify({'error' : error})  # return facebook-specific error message if there is one
+#publish_ad.py is the definitive workflow for any questions regarding the publish_ad method
+    try:
+        # edge case to determine if page has leadgen_tos_accepted
+        # reference leadgen_tos_accepted.py for questions
+        page_id = request.form['page'] # '218711598949970' # abc realty
+        FacebookAdsApi.init(access_token=g.user['access_token'], api_version='v3.3')
+        result = Page(page_id).api_get( # api_get is the way to get a field from an object
+            fields=['access_token'],
+            params={},
+        )
+        page_access_token = result['access_token']
+
+        # get leadgen_tos_accepted from marketing api
+        FacebookAdsApi.init(access_token=page_access_token, api_version='v3.3')
+        leadad_tos_accepted = Page(page_id).api_get( # api_get is the way to get a field from an object
+            fields=['leadgen_tos_accepted'],
+            params={},
+        )
+
+        if leadad_tos_accepted['leadgen_tos_accepted'] is False:
+            return jsonify({'tos_accepted' : False})
+
+        # initialize variables used during ad creation
+        ad_account = 'act_804097463107225' #hardcode to prevent publishing to bobs account # request.form['ad_account'] # set ad_account equal to user selected ad_account
+        url = request.form['url']
+        privacy_policy = "https://fbapp0111.herokuapp.com/terms"  # what if app users could all use the same privacy policy that I host on the app
+        message = request.form['text']
+        headline = request.form['headline']
+        budget = request.form['budget']
+        image_url = request.form['image']
+        city = request.form['city_key']
+        print(ad_account)
+        print(url)
+        print(privacy_policy)
+        print(message)
+        print(headline)
+        print(budget)
+        print(image_url)
+        print(city)
+
+        # Step 1: create a campaign;
+        # Here's a reference for campaign creation: https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group#Creating
+
+        fields = [
+        ]
+        params ={
+            'name': "Campaign Name Placeholder",
+            'objective': 'LEAD_GENERATION',
+            'status': "PAUSED", # need to switch to active
+            'buying_type': "AUCTION",
+        }
+        campaign = AdAccount(ad_account).create_campaign(
+            fields=fields,
+            params=params,
+        )
+        #session['lead_ad']['campaign_id'] = campaign["id"]  # save campaign id in session
+
+    # Step 2: create an ad set
+    # here's a reference: https://developers.facebook.com/docs/marketing-api/reference/ad-account/ad_sets/
+    # https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group/adsets/
+
+        fields = [
+        ]
+        params = {
+          'name': "Ad Set Name Placeholder",
+          'optimization_goal': 'LEAD_GENERATION',
+          'billing_event': 'IMPRESSIONS',
+          'bid_strategy': 'LOWEST_COST_WITHOUT_CAP',
+          'lifetime_budget': budget, # $1
+          'end_time' : datetime.now() + timedelta(days=3),
+          'campaign_id': campaign["id"],
+          "targeting": {
+            "age_max": 65,
+            "age_min": 18,
+            "exclusions": {
+              "interests": [
+                {
+                  "id": "6003278963980",
+                  "name": "Loan officer"
+                }
+              ],
+              "work_positions": [
+                {
+                  "id": "1025100880851927",
+                  "name": "Real Estate Agent/Broker"
+                },
+                {
+                  "id": "111867022164671",
+                  "name": "Real estate broker"
+                },
+                {
+                  "id": "171815889531702",
+                  "name": "Real Estate Agent/Salesperson"
+                }
+              ]
+            },
+            "flexible_spec": [
+              {
+                "interests": [
+                  {
+                    "id": "1661352784116422",
+                    "name": "Realtor.com"
+                  },
+                  {
+                    "id": "6002925289859",
+                    "name": "realtor.com"
+                  },
+                  {
+                    "id": "6003174415534",
+                    "name": "First-time buyer"
+                  },
+                  {
+                    "id": "6003307244821",
+                    "name": "Trulia"
+                  },
+                  {
+                    "id": "6003496612657",
+                    "name": "Homes.com"
+                  },
+                  {
+                    "id": "6003909817136",
+                    "name": "Zillow"
+                  },
+                  {
+                    "id": "6003970928096",
+                    "name": "House Hunting"
+                  },
+                  {
+                    "id": "6015042704805",
+                    "name": "trulia real estate"
+                  }
+                ]
+              }
+            ],
+            "geo_locations": {
+              "location_types": [
+                "home",
+                "recent"
+              ],
+              'cities':[{'key':city,'radius':15,'distance_unit':'mile'}]
+
+            },
+            "publisher_platforms": [
+              "facebook"
+            ],
+            "facebook_positions": [
+              "feed"
+            ],
+            "device_platforms": [
+              "mobile"
+            ]
+          },
+          'status': 'ACTIVE',
+          'promoted_object': {'page_id': page_id},
+        }
+        ad_set = AdAccount(ad_account).create_ad_set(
+          fields=fields,
+          params=params,
+        )
+
+    # Step 3: create a form;
+    # here's a reference document: https://developers.facebook.com/docs/marketing-api/guides/lead-ads/create
+    # for a list of pre-fill questions, expand the questions parameter here: https://developers.facebook.com/docs/graph-api/reference/page/leadgen_forms/#Creating
+
+        fields = [
+        ]
+        params = {  #  these fields can be found in under the page reference: https://developers.facebook.com/docs/graph-api/reference/page/
+          'name': str(datetime.now()), # name must be unique so just use current date and time
+          'follow_up_action_url': url,
+          # 'question_page_custom_headline': "Form Question_Page_ Placeholder"'question page title',
+          'questions': [
+              {
+                "key": "full_name",
+                "type": "FULL_NAME",
+              },
+              {
+                "key": "email",
+                "type": "EMAIL",
+              },
+              {
+                "key": "phone",
+                "type": "PHONE",
+              },
+              ],
+          #'privacy_policy_url': "https://fbapp0111.herokuapp.com/terms",
+          #'privacy_policy': 'Object',
+          'privacy_policy': {'url': privacy_policy, 'link_text': 'Privacy.'}, # https://developers.facebook.com/docs/graph-api/reference/page/
+          #'legal_content_id': 'string',
+          # thank_you_page is optional
+         # "leadgen_tos_accepted": True
+            }
+
+        #FacebookAdsApi.init(access_token=session['page_access_token'])
+        lead_gen_form = (Page(page_id).create_lead_gen_form( # ABC realty  page_id: 218711598949970 shaw marketing page_id: #1775351279446344
+          fields=fields,
+          params=params,
+        ))
+
+    # Step 4: create a creative
+        fields = [
+        ]
+        params = {
+            'object_story_spec': {
+                'page_id': page_id,
+                'link_data': {
+                    'message': message,
+                    'link': 'http://fb.me/',
+                    'picture': image_url,
+                    'name': headline,
+                    #'caption':'WWW.ITUNES.COM',
+                    #'description':'The link description',
+                    #'title': adheadline,
+                    'call_to_action': {
+                        'type':'LEARN_MORE', # other options, include: APPLY_NOW, DOWNLOAD, GET_QUOTE, LEARN_MORE, SIGN_UP, SUBSCRIBE
+                        'value': {
+                            'link':'http://fb.me/',
+                            'lead_gen_form_id': lead_gen_form['id']
+                        }
+                    }
+                }
+            },
+        }
+        #print(g.user['access_token'])
+        #FacebookAdsApi.init(access_token=g.user['access_token']) # requires user access token
+        creative = AdAccount(ad_account).create_ad_creative( # requires user access token
+          fields=fields,
+          params=params,
+        )
+
+    # Step 5: create an ad, which requires the creative_id and adset_id
+        fields = [
+        ]
+        params = {
+          'name': 'Ad Name Placeholder',
+          'adset_id': ad_set["id"],
+          'creative': {'creative_id': creative["id"]},
+          'status': 'ACTIVE',
+        }
+        ad = AdAccount(ad_account).create_ad(
+          fields=fields,
+          params=params,
+        )
+        error = ""
+        return jsonify({'error' : error})  # return facebook-specific error message if there is one
+    except FacebookError as e:
+        error = "Whoops! Error Publishing The Ad."
+        if e.body():
+            error = e.body()
+            error = error['error']['error_user_msg']
+        return jsonify({'error' : error})  # return facebook-specific error message if there is one
 
 @app.route('/set_email', methods=['POST'])
 def set_email():
@@ -441,7 +685,10 @@ def errorhandler(e):
     """Handle error"""
     if not isinstance(e, HTTPException):
         e = InternalServerError()
-    return apology(e.name, e.code)
+    # return apology(e.name, e.code)
+    # return redirect('/error')
+    return "error"
+
 
 # Listen for errors
 for code in default_exceptions:
@@ -450,5 +697,5 @@ for code in default_exceptions:
 if __name__ == '__main__':
     app.debug = False
     port = int(os.environ.get('PORT', 5000))
-    # app.run(host='0.0.0.0', port=port) # production mode
-    app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode
+    app.run(host='0.0.0.0', port=port) # production mode
+    #app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode

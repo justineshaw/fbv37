@@ -19,10 +19,6 @@ def get_page_access_token(access_token):
     #session['page_id'] = page_id
     return page_access_token
 
-def apology(message, code=400):
-    return "Error"
-
-
 def login_required(f):
     """
     Decorate routes to require login.

@@ -35,8 +35,9 @@
               <!-- &#128293; NEW [CITY] area listing!! &#128293; &#13;BEDS: [BEDS] &#13;BATHS: [BATHS] &#13;SQ FT: [SQFT]&#13;&#13;&#127968;&#128273;&#127968;&#128273;&#127968;&#128273;&#13;&#13;To see the price, location, and more pictures, tap "Learn More" -->
         </div>
         <div class="form-group">
-              <label class="sr-only" for="image">Image</label>
-              <input type="text" class="form-control" id="image" placeholder="Image">
+              <label class="sr-only" for="text">Link to Image</label>
+              <input type="text" class="form-control" id="image" placeholder="Image" value="https://drive.google.com/uc?id=1_pvz61BtsDM1T2n21oU9bRASNUG3BCak"> <!--value="https://drive.google.com/file/d/1_pvz61BtsDM1T2n21oU9bRASNUG3BCak/preview"-->
+              <small id="emailHelp" class="form-text text-muted"><a href="https://docs.google.com/document/d/1XR2b38j4g-nYfhp0TFdZRsTWPqV9bc_Y9bRudrlcrOw" class="alert-link" target="_blank">How To Get Image Link</a></small>
         </div>
     </form>
 </div>
@@ -44,24 +45,32 @@
 <div class="container py-5" id="lead_ad_generator_form_3" style="display:none;">
     <h6>Finish Your Lead Ad</h6>
     <form class="lead_ad_generator_form_3">
-            <div class="form-group">
-                  <!-- https://getbootstrap.com/docs/4.3/components/input-group/ -->
-                    <label for="validationServer01">Budget</label>
-                    <select id="budget" class="custom-select" name="budget" required>
-                      <option value="5">$5</option>
-                      <option value="20" selected>$20</option>
-                      <option value="50">$50</option>
-                    </select>
-                    <div class="valid-feedback">Looks good!</div>
-            </div>
-            <div class="form-group">
-                  <label class="sr-only" for="privacyPolicy">Privacy Policy</label>
-                  <input type="text" class="form-control" id="privacy_policy" placeholder="Privacy Policy" value="LinkToTheProperty.com/PrivacyPolicy">
-            </div>
-            <div id="lead_ad_generator_form_3_url" class="form-group">
-                  <label class="sr-only" for="url">Url</label>
-                  <input type="text" class="form-control" id="url" placeholder="url" value="LinkToTheProperty.com">
-            </div>
+        <div id="location" class="form-group">
+              <label id="location_query_box" class="secret sr-only" for="text"></label>
+              <input type="text" class="form-control input-sm" id="location_query" placeholder="location" value="">
+              <!--<div id="location_list" class="dropdown border border-secondary" style="display:none;">
+                  <!--<div class="dropdown-content">-->
+              <ul class="list-group">
+              </ul>
+        </div>
+        <div class="form-group">
+              <!-- https://getbootstrap.com/docs/4.3/components/input-group/ -->
+                <label for="validationServer01">Budget</label>
+                <select id="budget" class="custom-select" name="budget" required>
+                  <option value="500">$5</option>
+                  <option value="2000" selected>$20</option>
+                  <option value="5000">$50</option>
+                </select>
+                <div class="valid-feedback">Looks good!</div>
+        </div>
+        <div class="form-group" style="display:none;">
+              <label class="sr-only" for="privacyPolicy">Privacy Policy</label>
+              <input type="text" class="form-control" id="privacy_policy" placeholder="Privacy Policy" value="LinkToTheProperty.com/PrivacyPolicy">
+        </div>
+        <div id="lead_ad_generator_form_3_url" class="form-group">
+              <label class="sr-only" for="url">Url</label>
+              <input type="text" class="form-control" id="url" placeholder="url" value="LinkToTheProperty.com">
+        </div>
     </form>
 </div>
 
@@ -72,7 +81,7 @@
         <div class="form-group">
           <label for="exampleInputEmail1">Email address</label>
           <input type="email" name="email" class="form-control form-control-sm" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="SendMeLeads@gmail.com">
-          <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+          <small id="imageHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
         </div>
         <!-- trigger python function to add email to database and return home page -->
         <button class="btn btn-primary" type="submit">Send Me Leads!</button>
@@ -83,9 +92,17 @@
 
 {% block col2 %}
 <div class="container" id="lead_ad_preview_div" style="display:block;">
-    <!-- <p id="iframe">...</p> -->
-    <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;"></div>
+    <!-- alerts -->
+    <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;">Error.</div>
     <div id="successAlert" class="alert alert-success" role="alert" style="display:none;">Your ad succesfully published!</div>
+    <div id="toserrorAlert" class="alert alert-danger alert-dismissible fade show" role="alert" style="display:none;">
+      Error: You haven't accepted Facebook's Lead Ads Terms for this page. <a href="https://www.facebook.com/ads/leadgen/tos" id="tos_link" class="alert-link" target="_blank">View Terms</a>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+
+    <!-- iframe and button -->
     <iframe id="lead_ad_preview" src="https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif" width="335" height="450" scrolling="yes" style="border:none;"></iframe>
     <div id="publish_lead_ad_button_div" class="row justify-content-center" style="display:none;">
         <input id="publish_lead_ad_button" class="btn btn-primary" type="submit" value="Publish Lead Ad" disabled>

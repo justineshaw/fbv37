@@ -6,6 +6,10 @@ nav .navbar-brand
 
 /* colors for table: https://www.w3schools.com/html/html_tables.asp */
 
+.active {
+    background: #f00;
+}
+
 #c1 {
   width: 100%;
   background-color: LightGrey;
