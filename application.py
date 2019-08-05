@@ -733,7 +733,7 @@ def webhook():
                     print( 'page_id: ' + page_id )
 
                     lead_form_id = lead_event['value']['form_id']
-                    print('lead_form: ' + lead_form_id)
+                    print('lead_form_id: ' + lead_form_id)
 
                     lead_id = lead_event['value']['leadgen_id']
                     print('lead_id: ' + lead_id)
@@ -756,12 +756,12 @@ def webhook():
                       fields=fields,
                       params=params,
                     )
-
+                    print(data)
                     # for each datafield returned by the leadgen_id, save it to a variable
                     for field_data in data["field_data"]:
                         if field_data["name"]=='email':
                             email = field_data["values"][0]
-                            print('email: ' + field_data["values"])
+                            print('email: ' + email)
 
                         elif field_data["name"] == 'full_name':
                             full_name = field_data["values"][0]
@@ -775,9 +775,13 @@ def webhook():
                     db.execute("INSERT INTO leads (page_id, full_name, email, phone) VALUES (:page_id, :full_name, :email, :phone)",
                                page_id=page_id, full_name=full_name, email=email, phone = phone)
 
-                    # for each lead, call email_user function to send an email to user
+                    # get email address associated with lead
+                    data = db.execute("SELECT email FROM users, ads WHERE (SELECT users_table_id FROM ads WHERE page_id = '1775351279446344') = users.id")
+                    print(data[0])
                     # user = db.execute("SELECT * FROM users WHERE page_id = :page_id", page_id=page_id) # retrieve user info from database to later store in session
                     # print(user[0])
+
+                    # for each lead, call email_user function to send an email to user
         return redirect('/')
 
     else:
