@@ -714,6 +714,79 @@ def set_email():
     db.execute("UPDATE users SET email = :email WHERE id = :id", email = email, id = session["id"])
     return redirect("/")
 
+# retrieve lead and add to facebook
+@app.route("/webhook", methods=["GET", "POST"])
+def webhook():
+# reference: https://developers.facebook.com/docs/marketing-api/guides/lead-ads/retrieving
+    print("running /webhook on application.py")
+    if request.method == "POST":
+
+        data = request.get_json()
+        print(data)
+
+        if data["object"] == "page": # make sure incoming ping is from a page
+
+            for entry in data["entry"]: # account for more than one lead at a time
+                page_id = entry['id']
+
+                for lead_event in entry["changes"]:
+                    print( 'page_id: ' + page_id )
+
+                    lead_form_id = lead_event['value']['form_id']
+                    print('lead_form: ' + lead_form_id)
+
+                    lead_id = lead_event['value']['leadgen_id']
+                    print('lead_id: ' + lead_id)
+
+                    # Method 2: make a GET request for lead info using Facebook-SDK library
+                    '''
+                    graph = GraphAPI('num') # i have the access token stored in variable "graph"
+                    lead = graph.get_object(lead_id) # i have the profile into stored in "profile"
+                    print(lead)
+                    '''
+                    # Method 1: make a GET request for lead info using the official Python Business SDK
+                    #user_access_token = os.getenv("TEST_USER_ACCESS_TOKEN")
+                    page_access_token = os.getenv("TEST_PAGE_ACCESS_TOKEN")
+                    FacebookAdsApi.init(access_token=page_access_token)
+                    fields = [
+                    ]
+                    params = {
+                    }
+                    data = Lead(lead_id).api_get(
+                      fields=fields,
+                      params=params,
+                    )
+
+                    # for each datafield returned by the leadgen_id, save it to a variable
+                    for field_data in data["field_data"]:
+                        if field_data["name"]=='email':
+                            email = field_data["values"][0]
+                            print('email: ' + field_data["values"])
+
+                        elif field_data["name"] == 'full_name':
+                            full_name = field_data["values"][0]
+                            print('full_name: ' + full_name)
+
+                        elif field_data["name"] == 'phone_number':
+                            phone = field_data["values"][0]
+                            print('phone_number: ' + phone)
+
+                    # for each lead, store lead in SQL database
+                    db.execute("INSERT INTO leads (page_id, full_name, email, phone) VALUES (:page_id, :full_name, :email, :phone)",
+                               page_id=page_id, full_name=full_name, email=email, phone = phone)
+
+                    # for each lead, call email_user function to send an email to user
+                    # user = db.execute("SELECT * FROM users WHERE page_id = :page_id", page_id=page_id) # retrieve user info from database to later store in session
+                    # print(user[0])
+        return redirect('/')
+
+    else:
+        if request.args.get("hub.challenge"):
+            if not request.args.get("hub.verify_token") == os.getenv("VERIFY_TOKEN"):
+                return "Verification token mismatch", 403
+            return request.args["hub.challenge"], 200
+        return "hello world", 200
+
 @app.route("/terms", methods=["GET", "POST"])
 def terms():
     print("##### terms/logout ######")
@@ -736,7 +809,7 @@ if __name__ == '__main__':
     app.debug = False
     port = int(os.environ.get('PORT', 5000))
     # production mode
-    # app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port)
 
     # development mode
-    app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode
+    # app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode
