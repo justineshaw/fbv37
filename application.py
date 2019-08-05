@@ -57,9 +57,12 @@ from facebook_business.adobjects.page import Page
 from facebook_business.adobjects.targetingsearch import TargetingSearch
 from facebook_business.adobjects.user import User
 
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, From, To
+
 # set path to environment variables
-env_path = Path('.gitignore') / '.env'
-load_dotenv(dotenv_path=env_path)
+# env_path = Path('.env')
+# load_dotenv(dotenv_path=env_path)
 
 # set app secret and app id
 FB_APP_SECRET = os.getenv("APP_SECRET")
@@ -455,11 +458,18 @@ def publish_ad():
         # reference leadgen_tos_accepted.py for questions
         page_id = request.form['page'] # '218711598949970' # abc realty
         FacebookAdsApi.init(access_token=g.user['access_token'], api_version='v3.3')
+
+        # another option to get page_access_token is to call User(id).get_accounts as outlined here https://developers.facebook.com/docs/marketing-api/guides/lead-ads/retrieving#webhooks
         result = Page(page_id).api_get( # api_get is the way to get a field from an object
             fields=['access_token'],
             params={},
         )
         page_access_token = result['access_token']
+        print("page_access_token - long?: " + str(page_access_token))
+
+        # add page_access_token to pages table for /webhook lead retrieval
+        db.execute("INSERT INTO pages (user_table_id, page_id, page_access_token) VALUES (:user_table_id, :page_id, :page_access_token)",
+                           user_table_id = session["id"], page_id = page_id, page_access_token = page_access_token)
 
         # get leadgen_tos_accepted from marketing api
         FacebookAdsApi.init(access_token=page_access_token, api_version='v3.3')
@@ -715,7 +725,7 @@ def set_email():
     return redirect("/")
 
 # retrieve lead and add to facebook
-@app.route("/webhook", methods=["GET", "POST"])
+@app.route("/webhook", methods=["POST"])
 def webhook():
 # reference: https://developers.facebook.com/docs/marketing-api/guides/lead-ads/retrieving
     print("running /webhook on application.py")
@@ -777,6 +787,18 @@ def webhook():
                     print(email)
 
                     # for each lead, call email_user function to send an email to user
+                    SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+                    message = Mail(
+                        from_email=From('easyworkemail@gmail.com', 'Lead Bot'),
+                        to_emails=email,
+                        subject="You've Got A Lead!",
+                        html_content='<br><strong>Name: </strong>' + name + '<br><strong>Email: </strong>' + email + '<br><strong>Phone: </strong>' + phone + '<br><p>Thanks for using Real Leads!</p><br><a href="http://fbapp0111.herokuapp.com">Get More Leads!</a>')
+                    try:
+                        sg = SendGridAPIClient(SENDGRID_API_KEY)
+                        response = sg.send(message)
+                    except Exception as e:
+                        print("Error:")
+                        print(str(e))
 
         return redirect('/')
 
@@ -786,6 +808,15 @@ def webhook():
                 return "Verification token mismatch", 403
             return request.args["hub.challenge"], 200
         return "hello world", 200
+
+# display users leads in a table
+@app.route("/my_leads", methods=["GET", "POST"])
+@login_required
+def my_leads():
+    leads = db.execute("SELECT * FROM leads WHERE leads.page_id IN (SELECT page_id FROM pages WHERE user_table_id = :user_table_id)", user_table_id = session["id"])
+    count = len(leads)
+
+    return render_template("my_leads.html", leads = leads, count = count)
 
 @app.route("/terms", methods=["GET", "POST"])
 def terms():

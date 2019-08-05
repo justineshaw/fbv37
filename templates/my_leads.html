@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+
+      <br>
+      <div class="container" style="max-width:800px">
+      <div class="table-responsive">
+        <a href="/lead_ad_generator" class=btn-block id="goback">Get More Leads!</a>
+        <table class="table table table-striped" align="center">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Email</th>
+              <th scope="col">Phone</th>
+              <th scope="col">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for x in range(count) %}
+            <tr>
+              <td>{{ leads[x]["full_name"] }}</td>
+              <td>{{ leads[x]["email"] }}</td>
+              <td>{{ leads[x]["phone"] }}</td>
+              <td>{{ leads[x]["created_at"] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      </div>
+{% endblock %}

@@ -79,6 +79,7 @@ Pyphen==0.9.5
 PySocks==1.6.8
 python-dateutil==2.8.0
 python-dotenv==0.10.1
+python-http-client==3.1.0
 python-magic==0.4.15
 pytz==2018.5
 PyYAML==3.13
@@ -87,6 +88,7 @@ requests==2.19.1
 requests-oauthlib==1.0.0
 retrying==1.3.3
 s3transfer==0.2.0
+sendgrid==6.0.5
 six==1.11.0
 SQLAlchemy==1.2.12
 sqlparse==0.2.4
