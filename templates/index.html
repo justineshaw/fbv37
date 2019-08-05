@@ -19,10 +19,12 @@
             </tr>
           </thead>
           <tbody>
+            {% for x in range(count) %}
             <tr>
-              <td><iframe class="shadow p-3 mb-5 bg-white rounded" src="{{ iframe }}" width="335" height="450" scrolling="yes" style="border:none;"></iframe></td>
+              <td><iframe class="shadow p-3 mb-5 bg-white rounded" src="{{ iframes[x] }}" width="335" height="450" scrolling="yes" style="border:none;"></iframe></td>
               <td class="align-middle font-weight-bold"> 0 leads</td>
             </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
