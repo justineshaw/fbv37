@@ -732,7 +732,7 @@ def webhook():
     if request.method == "POST":
 
         data = request.get_json()
-        print(data)
+        #print(data)
 
         if data["object"] == "page": # make sure incoming ping is from a page
 
@@ -740,17 +740,17 @@ def webhook():
                 page_id = entry['id']
 
                 for lead_event in entry["changes"]:
-                    print( 'page_id: ' + page_id )
+                    #print( 'page_id: ' + page_id )
 
                     lead_form_id = lead_event['value']['form_id']
-                    print('lead_form_id: ' + lead_form_id)
+                    #print('lead_form_id: ' + lead_form_id)
 
                     lead_id = lead_event['value']['leadgen_id']
-                    print('lead_id: ' + lead_id)
+                    #print('lead_id: ' + lead_id)
 
                     # get page token from database
                     data = db.execute("SELECT page_access_token FROM pages WHERE page_id = :page_id", page_id = page_id)
-                    print(data)
+                    #print(data)
                     page_access_token = data[0]["page_access_token"]
 
                     FacebookAdsApi.init(access_token=page_access_token)
@@ -763,19 +763,20 @@ def webhook():
                       params=params,
                     )
                     print(data)
+
                     # for each datafield returned by the leadgen_id, save it to a variable
                     for field_data in data["field_data"]:
                         if field_data["name"]=='email':
                             email = field_data["values"][0]
-                            print('email: ' + email)
+                            #print('email: ' + email)
 
                         elif field_data["name"] == 'full_name':
                             full_name = field_data["values"][0]
-                            print('full_name: ' + full_name)
+                            #print('full_name: ' + full_name)
 
                         elif field_data["name"] == 'phone':
                             phone = field_data["values"][0]
-                            print('phone_number: ' + phone)
+                            #print('phone_number: ' + phone)
 
                     # for each lead, store lead in SQL database
                     db.execute("INSERT INTO leads (page_id, full_name, email, phone, lead_id) VALUES (:page_id, :full_name, :email, :phone, :lead_id)",
@@ -783,7 +784,6 @@ def webhook():
 
                     # get email address associated with lead
                     data = db.execute("SELECT email FROM users, ads WHERE (SELECT users_table_id FROM ads WHERE page_id = :page_id) = users.id", page_id = page_id)
-                    email = data[0]["email"]
                     print(email)
 
                     # for each lead, call email_user function to send an email to user
@@ -796,6 +796,9 @@ def webhook():
                     try:
                         sg = SendGridAPIClient(SENDGRID_API_KEY)
                         response = sg.send(message)
+                        print(response.status_code)
+                        print(response.body)
+                        print(response.headers)
                     except Exception as e:
                         print("Error:")
                         print(str(e))
