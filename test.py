@@ -16,9 +16,9 @@ from facebook_business.adobjects.adpreview import AdPreview
 from facebook_business.api import FacebookAdsApi
 from bs4 import BeautifulSoup # webscraper
 
-access_token = 'EAAFhpQB0HY0BACSTldP0RAf2gVEMgQK9zM1cepPipVfD1f8yP1nuwNNRBDhXVFBMmqdJZBzS5WZBDZCCLvHgICZANCrXYoAZCxxIHxlajh3qBSL7rcAIsbU6IaxGtFvGLX9vZBWqACbgqNXBzwJlN6ZBfcOeyt5W563948vHm6LZAeBBLuC89nIT9t0t1gDCokXokgsAF9YynQZDZD'
-app_secret = '2a86ab613c5684fa9c361c0c46f0dd8b'
-app_id = '342529826361699'
+access_token = ''
+app_secret = ''
+app_id = ''
 id = '23844161610780536'
 FacebookAdsApi.init(access_token=access_token, api_version='v3.3')
 
