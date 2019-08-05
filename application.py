@@ -792,7 +792,7 @@ def webhook():
                         from_email=From('easyworkemail@gmail.com', 'Lead Bot'),
                         to_emails=email,
                         subject="You've Got A Lead!",
-                        html_content='<br><strong>Name: </strong>' + name + '<br><strong>Email: </strong>' + email + '<br><strong>Phone: </strong>' + phone + '<br><p>Thanks for using Real Leads!</p><br><a href="http://fbapp0111.herokuapp.com">Get More Leads!</a>')
+                        html_content='<br><strong>Name: </strong>' + full_name + '<br><strong>Email: </strong>' + email + '<br><strong>Phone: </strong>' + phone + '<br><p>Thanks for using Real Leads!</p><br><a href="http://fbapp0111.herokuapp.com">Get More Leads!</a>')
                     try:
                         sg = SendGridAPIClient(SENDGRID_API_KEY)
                         response = sg.send(message)
