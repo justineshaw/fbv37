@@ -767,7 +767,7 @@ def webhook():
                             full_name = field_data["values"][0]
                             print('full_name: ' + full_name)
 
-                        elif field_data["name"] == 'phone_number':
+                        elif field_data["name"] == 'phone':
                             phone = field_data["values"][0]
                             print('phone_number: ' + phone)
 
