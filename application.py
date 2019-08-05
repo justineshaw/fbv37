@@ -738,15 +738,11 @@ def webhook():
                     lead_id = lead_event['value']['leadgen_id']
                     print('lead_id: ' + lead_id)
 
-                    # Method 2: make a GET request for lead info using Facebook-SDK library
-                    '''
-                    graph = GraphAPI('num') # i have the access token stored in variable "graph"
-                    lead = graph.get_object(lead_id) # i have the profile into stored in "profile"
-                    print(lead)
-                    '''
-                    # Method 1: make a GET request for lead info using the official Python Business SDK
-                    #user_access_token = os.getenv("TEST_USER_ACCESS_TOKEN")
-                    page_access_token = os.getenv("TEST_PAGE_ACCESS_TOKEN")
+                    # get page token from database
+                    data = db.execute("SELECT page_access_token FROM pages WHERE page_id = :page_id", page_id = page_id)
+                    print(data)
+                    page_access_token = data[0]["page_access_token"]
+
                     FacebookAdsApi.init(access_token=page_access_token)
                     fields = [
                     ]
@@ -776,7 +772,7 @@ def webhook():
                                page_id=page_id, full_name=full_name, email=email, phone = phone, lead_id = data["id"])
 
                     # get email address associated with lead
-                    data = db.execute("SELECT email FROM users, ads WHERE (SELECT users_table_id FROM ads WHERE page_id = '1775351279446344') = users.id")
+                    data = db.execute("SELECT email FROM users, ads WHERE (SELECT users_table_id FROM ads WHERE page_id = :page_id) = users.id", page_id = page_id)
                     email = data[0]["email"]
                     print(email)
 
