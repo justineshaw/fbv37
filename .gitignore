@@ -11,3 +11,4 @@ get_valid_location.py
 lead_ad_targeting.py
 fblogin-driver.py
 templates/v1-fblogin.html
+test.py

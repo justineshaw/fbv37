@@ -100,10 +100,10 @@
 
                   FB.init({
                       // production
-                      appId      : "342529826361699",
+                      // appId      : "342529826361699",
 
                       // development
-                      // appId      : "388836281818509",
+                      appId      : "388836281818509",
 
                       status     : true,
                       cookie     : true, // enable cookies to allow the server to access the session
@@ -135,12 +135,12 @@
             <div class="collapse navbar-collapse" id="navbar">
                 {% if session.id %}
                     <ul class="navbar-nav mr-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/">Leads</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/preview">New Ad</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/ads">Ads Manager</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/"></a></li>
+                        <li class="nav-item"><a class="nav-link" href="/preview"></a></li>
+                        <li class="nav-item"><a class="nav-link" href="/ads"></a></li>
                     </ul>
                     <ul class="navbar-nav ml-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/logout"></a></li>
                     </ul>
                 {% else %}
                     <ul class="navbar-nav ml-auto mt-2">
@@ -178,7 +178,7 @@
         </main>
 
         <footer class="small text-center text-muted">
-            Project is part of <a href="https://developers.facebook.com/docs/marketing-api/buying-api">Facebook Marketing API</a>. View <a href="/terms">our  Terms of Use</a>.
+            <a href="/terms">Terms</a>.
         </footer>
 
     </body>

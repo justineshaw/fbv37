@@ -295,11 +295,30 @@ def logout():
 @app.route("/")
 @login_required
 def index():
-    if session.get("user"):
-        message = "Get MORE Leads!!"
-    else:
-        message = "Get Leads!!"
-    return render_template("index.html", message=FB_APP_ID)
+    # select all ads for currently logged in user
+    ads = db.execute("SELECT * FROM ads WHERE users_table_id = :id", id=session["id"])
+
+    if ads:
+        # get access token from server
+        rows = db.execute("SELECT * FROM users WHERE id = :id", id=str(session["id"]))
+        FacebookAdsApi.init(access_token=rows[0]["access_token"], api_version='v3.3')
+        fields = [
+        ]
+        params = {
+          'ad_format': 'MOBILE_FEED_STANDARD',
+        }
+        data = AdCreative(ads[0]['creative_id']).get_previews(
+          fields=fields,
+          params=params,
+        )
+        soup = BeautifulSoup(data[0]['body'], 'html5lib')
+        iframe = soup.find_all('iframe')[0]['src']
+        print(iframe)
+        return render_template("index.html", iframe=iframe)
+        #return render_template("index.html", count=1, iframe=iframe)
+    return redirect('/lead_ad_generator')
+    #else:
+        #return render_template("index.html", message="Create Your First Lead Ad!", count=0, rows={1})
 
 # get page_access_token to user during ad creation?
 
@@ -477,9 +496,9 @@ def publish_ad():
         )
         #session['lead_ad']['campaign_id'] = campaign["id"]  # save campaign id in session
 
-    # Step 2: create an ad set
-    # here's a reference: https://developers.facebook.com/docs/marketing-api/reference/ad-account/ad_sets/
-    # https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group/adsets/
+        # Step 2: create an ad set
+        # here's a reference: https://developers.facebook.com/docs/marketing-api/reference/ad-account/ad_sets/
+        # https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group/adsets/
 
         fields = [
         ]
@@ -580,9 +599,9 @@ def publish_ad():
           params=params,
         )
 
-    # Step 3: create a form;
-    # here's a reference document: https://developers.facebook.com/docs/marketing-api/guides/lead-ads/create
-    # for a list of pre-fill questions, expand the questions parameter here: https://developers.facebook.com/docs/graph-api/reference/page/leadgen_forms/#Creating
+        # Step 3: create a form;
+        # here's a reference document: https://developers.facebook.com/docs/marketing-api/guides/lead-ads/create
+        # for a list of pre-fill questions, expand the questions parameter here: https://developers.facebook.com/docs/graph-api/reference/page/leadgen_forms/#Creating
 
         fields = [
         ]
@@ -618,7 +637,7 @@ def publish_ad():
           params=params,
         ))
 
-    # Step 4: create a creative
+        # Step 4: create a creative
         fields = [
         ]
         params = {
@@ -649,7 +668,7 @@ def publish_ad():
           params=params,
         )
 
-    # Step 5: create an ad, which requires the creative_id and adset_id
+        # Step 5: create an ad, which requires the creative_id and adset_id
         fields = [
         ]
         params = {
@@ -663,6 +682,11 @@ def publish_ad():
           params=params,
         )
         error = ""
+
+        # add new ad to db
+        db.execute("INSERT INTO ads (fb_user_id, campaign_id, lead_gen_form_id, creative_id, ad_account_id, page_id, users_table_id) VALUES (:fb_user_id, :campaign_id, :lead_gen_form_id, :creative_id, :ad_account_id, :page_id, :users_table_id)",
+                   fb_user_id = g.user['user_id'], campaign_id = campaign["id"], lead_gen_form_id = lead_gen_form['id'], creative_id = creative["id"], ad_account_id = ad_account, page_id = page_id, users_table_id = session["id"])
+
         return jsonify({'error' : error})  # return facebook-specific error message if there is one
     except FacebookError as e:
         error = "Whoops! Error Publishing The Ad."
@@ -676,10 +700,13 @@ def set_email():
 
     # add email to database
     email = request.form.get("email") # get email address entered
-    print(email)
-    print(session["id"]) # confirm we have a user
     db.execute("UPDATE users SET email = :email WHERE id = :id", email = email, id = session["id"])
     return redirect("/")
+
+@app.route("/terms", methods=["GET", "POST"])
+def terms():
+    print("##### terms/logout ######")
+    return render_template("terms.html")
 
 def errorhandler(e):
     """Handle error"""
@@ -698,7 +725,7 @@ if __name__ == '__main__':
     app.debug = False
     port = int(os.environ.get('PORT', 5000))
     # production mode
-    app.run(host='0.0.0.0', port=port)
+    # app.run(host='0.0.0.0', port=port)
 
     # development mode
-    #app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode
+    app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode

@@ -6,10 +6,25 @@
 
 {% block main %}
 
-    <br>
+      <br>
       <div class="container" style="max-width:800px">
       <div class="table-responsive">
         <a href="/lead_ad_generator" class=btn-block id="goback">Get More Leads!</a>
+        <table class="table .table-borderless" align="center">
+          <thead>
+            <tr>
+              <th scope="col">Ad</th>
+              <th scope="col">Leads</th>
+              <!-- <th>Start Date</th> -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><iframe class="shadow p-3 mb-5 bg-white rounded" src="{{ iframe }}" width="335" height="450" scrolling="yes" style="border:none;"></iframe></td>
+              <td class="align-middle font-weight-bold"> 0 leads</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       </div>
 {% endblock %}
