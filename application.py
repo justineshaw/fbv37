@@ -772,16 +772,16 @@ def webhook():
                             print('phone_number: ' + phone)
 
                     # for each lead, store lead in SQL database
-                    db.execute("INSERT INTO leads (page_id, full_name, email, phone) VALUES (:page_id, :full_name, :email, :phone)",
-                               page_id=page_id, full_name=full_name, email=email, phone = phone)
+                    db.execute("INSERT INTO leads (page_id, full_name, email, phone, lead_id) VALUES (:page_id, :full_name, :email, :phone, :lead_id)",
+                               page_id=page_id, full_name=full_name, email=email, phone = phone, lead_id = data["id"])
 
                     # get email address associated with lead
                     data = db.execute("SELECT email FROM users, ads WHERE (SELECT users_table_id FROM ads WHERE page_id = '1775351279446344') = users.id")
-                    print(data[0])
-                    # user = db.execute("SELECT * FROM users WHERE page_id = :page_id", page_id=page_id) # retrieve user info from database to later store in session
-                    # print(user[0])
+                    email = data[0]["email"]
+                    print(email)
 
                     # for each lead, call email_user function to send an email to user
+
         return redirect('/')
 
     else:
