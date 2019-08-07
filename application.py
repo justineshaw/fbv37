@@ -105,7 +105,7 @@ def get_current_user():
         if session.get("user"):
             print("revisit")
             g.user = session.get("user")
-            print(g.user)
+            print("g.user: " + str(g.user))
             print("got g.user from session[user]!")
             return
 
@@ -121,18 +121,37 @@ def get_current_user():
 
         # if there is no result, we assume the user is not logged into facebook
         if result:
-            print("logged in")
+            print("app user logged in to fb but it's not stored in session")
 
             # Check to see if there is already a row in database with that  user is already in FB by using result from cookie parsing
             # test id is '1139085602941741'
             user = db.execute("SELECT * FROM users WHERE user_id = :uid", uid = result["uid"])
-            if user: # can delete when I understand more fully
-                print("fb id in db: ")
-                print(result["uid"])
+            print("user: " + str(user))
+
+            if user:
+                print("--fb id is already in db so check to see if access_token in db is valid--")
+
+                # when there's time, add a colum to db that has when the access_token expires and check to see if that that has passed before updating.
+                # why? we can only extend the access token once a day so if we trade an extended for a short that's silly.
+                # reference: https://groups.google.com/forum/#!searchin/pythonforfacebook/expired|sort:date/pythonforfacebook/Y-0DMMlSnFQ/wlYol5F3EXAJ
+
+                if user[0]["access_token"] != result["access_token"]:
+                # fb user is already in db but new access_token does not match with one on file, so update
+                    print("app user, " + str(session["id"])  + ", HAS logged in w/ fb before but access_token is old so we've updated")
+
+                    # If an existing user, update the access token
+                    print("old access token: " + str(user[0]["access_token"]))
+                    print("new access token: " + str(result["access_token"]))
+
+                    # extend new access token
+                    result["access_token"] = extend(result["access_token"], FB_APP_ID, FB_APP_SECRET)
+
+                    db.execute("UPDATE users SET access_token = :access WHERE id = :id",
+                                       access=result["access_token"], id = session["id"])
 
             # user's fb id is not in db so get thier fbid and access token and add to the row associated with their app id
-            if not user:
-                print("first fb login")
+            else:
+                print("first login w this fb id")
                 graph = GraphAPI(result["access_token"])
                 profile = graph.get_object("me")
                 if "link" not in profile:
@@ -140,22 +159,10 @@ def get_current_user():
 
                 # update database entry that exists for currently logged in user to store their fb info
                 #if session.get('id'):
+                old = db.execute("SELECT * FROM users WHERE id = :id", id = session["id"])
+                print("User before update:" + str(old))
                 db.execute("UPDATE users SET user_id = :uid, access_token = :access, profile_url = :profile, name = :name WHERE id = :id",
-                           uid=str(profile["id"]), access=result["access_token"], profile=profile["link"], name = profile["name"], id = session["id"]) # returns unique "id" of the user
-
-            elif user[0]["access_token"] != result["access_token"]:
-            # fb user is already in fb but new access_token does not match with one on file, so update
-                print("app user, " + str(session["id"])  + ", HAS logged in w/ fb before but access_token is old so we've updated")
-
-                # If an existing user, update the access token
-                print("old access token: " + str(user[0]["access_token"]))
-                print("new access token: " + str(result["access_token"]))
-
-                # extend new access token
-                result["access_token"] = extend(result["access_token"], FB_APP_ID, FB_APP_SECRET)
-
-                db.execute("UPDATE users SET access_token = :access WHERE id = :id",
-                                   access=result["access_token"], id = session["id"])
+                           uid=str(profile["id"]), access=extend(result["access_token"], FB_APP_ID, FB_APP_SECRET), profile=profile["link"], name = profile["name"], id = session["id"]) # returns unique "id" of the user
 
             # else if statement to handle users with multiple app accounts (i.e. have many rows in db)
 
@@ -298,40 +305,48 @@ def logout():
 @app.route("/")
 @login_required
 def index():
-    # select all ads for currently logged in user
-    ads = db.execute("SELECT * FROM ads WHERE users_table_id = :id", id=session["id"])
-    print(ads)
-    if ads:
-        # get access token from server
-        rows = db.execute("SELECT * FROM users WHERE id = :id", id=str(session["id"]))
-        FacebookAdsApi.init(access_token=rows[0]["access_token"], api_version='v3.3')
+    try:
+        # select all ads for currently logged in user
+        ads = db.execute("SELECT * FROM ads WHERE users_table_id = :id", id=session["id"])
+        print(ads)
+        if ads:
+            # get access token from server
+            rows = db.execute("SELECT * FROM users WHERE id = :id", id=str(session["id"]))
+            FacebookAdsApi.init(access_token=rows[0]["access_token"], api_version='v3.3')
 
-        # get an array of MOST RECENT iframes, up to 3
-        list = []
-        small = min(3,len(ads))
-        print(small)
-        for i in range(len(ads), len(ads)-small, -1): # given a list of 10, i'd want 10, 9, 8 in that order
-            print(i)
-            fields = [
-            ]
-            params = {
-              'ad_format': 'MOBILE_FEED_STANDARD',
-            }
-            data = AdCreative(ads[i-1]['creative_id']).get_previews(
-              fields=fields,
-              params=params,
-            )
-            soup = BeautifulSoup(data[0]['body'], 'html5lib')
-            iframe = soup.find_all('iframe')[0]['src']
-            list.append(iframe)
+            # get an array of MOST RECENT iframes, up to 3
+            list = []
+            small = min(3,len(ads))
+            print(small)
+            for i in range(len(ads), len(ads)-small, -1): # given a list of 10, i'd want 10, 9, 8 in that order
+                print(i)
+                fields = [
+                ]
+                params = {
+                  'ad_format': 'MOBILE_FEED_STANDARD',
+                }
+                data = AdCreative(ads[i-1]['creative_id']).get_previews(
+                  fields=fields,
+                  params=params,
+                )
+                soup = BeautifulSoup(data[0]['body'], 'html5lib')
+                iframe = soup.find_all('iframe')[0]['src']
+                list.append(iframe)
 
-        print(list)
-        print(list[0])
-        print(list[1])
-        return render_template("index.html", iframes=list, count=small)
-        #return render_template("index.html", count=1, iframe=iframe)
-    return redirect('/lead_ad_generator')
-    #else:
+            print(list)
+            print(list[0])
+            print(list[1])
+            return render_template("index.html", iframes=list, count=small)
+            #return render_template("index.html", count=1, iframe=iframe)
+        return redirect('/lead_ad_generator')
+    except FacebookError as e:
+        if e.body():
+            error = e.body()
+            error_code = error['error']['code']
+            #if error_code is 190:
+                # render_template("fblogin.html", app_id=FB_APP_ID)
+        return render_template("fblogin.html", app_id=FB_APP_ID)
+        #else:
         #return render_template("index.html", message="Create Your First Lead Ad!", count=0, rows={1})
 
 # get page_access_token to user during ad creation?
