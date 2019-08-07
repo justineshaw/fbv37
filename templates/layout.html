@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" class="h-100">
 
     <head>
 
@@ -30,25 +30,43 @@
         {
             background-color: LightBlue;
             padding: 10px 0px;
+
+        }
+
+        /*iPhone4 iframe*/
+        #iphone4 {
+            background-image: url("https://cdn4.iconfinder.com/data/icons/simple-device/300/flat-iphone-512.png");
+            background-repeat: no-repeat;
+            margin: 0 auto 30px;
+            position: relative;
+            height: 800px;
+            width: 700px;
+            background-size: cover;
+        }
+
+
+        /*Mobile iframe CSS for ihpone Frame
+        https://www.webdeveloper.com/d/280649-resolved-putting-an-image-as-a-frame-around-an-iframe/3
+        https://image.freepik.com/free-psd/white-mobile-phone-mock-up_1104-79.jpg
+        */
+        #lead_ad_preview {
+            height: 600px;
+            width: 326px;
+            position: absolute;
+            top: 105px;
+            left: 241px;
+            background-size: cover;
         }
 
 
         /* colors for brand */
-        nav .navbar-brand .blue
+        nav .navbar-brand .darkblue
         {
-            color: #007bff;
+            color: #4c637a;
         }
-        nav .navbar-brand .red
+        nav .navbar-brand .lightblue
         {
-            color: #ea433b;
-        }
-        nav .navbar-brand .yellow
-        {
-            color: #f5b82e;
-        }
-        nav .navbar-brand .green
-        {
-            color: #2e944b;
+            color: #5c9cdb;
         }
 
         main .form-control
@@ -93,17 +111,17 @@
 
     </head>
 
-    <body>
+    <body class="d-flex h-100 flex-column">
         <script type="text/javascript">
 
               window.fbAsyncInit = function() {
 
                   FB.init({
                       // production
-                      appId      : "342529826361699",
+                      // appId      : "342529826361699",
 
                       // development
-                      // appId      : "388836281818509",
+                      appId      : "388836281818509",
 
                       status     : true,
                       cookie     : true, // enable cookies to allow the server to access the session
@@ -128,7 +146,7 @@
         </script>
 
         <nav class="navbar navbar-expand-md navbar-light bg-light border">
-            <a class="navbar-brand" href="/"><span class=blue>Real <span class=red>Leads</span></a>
+            <a class="navbar-brand" href="/"><span class=darkblue>Real <span class=lightblue>Leads</span></a>
             <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -173,13 +191,11 @@
         {% endif %}
 
 
-        <main> <!-- removed <main class="container p-5"> to make lead_ad_generator look better-->
-            {% block main %}{% endblock %}
-        </main>
+        <main class="flex-grow-1"> <!-- removed <main class="container p-5"> to make lead_ad_generator look better-->
+        <!-- <main class="container flex-grow-1 d-flex flex-wrap align-content-center justify-content-center"> -->
+                {% block main %}{% endblock %}
 
-        <footer class="small text-center text-muted">
-            <a href="/terms">Terms</a>.
-        </footer>
+        </main>
 
     </body>
 

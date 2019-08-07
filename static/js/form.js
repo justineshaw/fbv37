@@ -1,3 +1,29 @@
+// load preview on first page load
+$(function ()
+{
+    if ($('form.lead_ad_generator_form_1').length > 0)
+    {
+        $.ajax({
+            data : {
+                ad_account : $('#ad_account').val(),
+                page : $('#page').val(),
+                headline : $('#headline').val(),
+                text : $('#text').val(),
+                image : $('#image').val(),
+                privacy_policy : $('#privacy_policy').val(),
+                url : $('#url').val(),
+                budget : $('#budget').val(),
+            },
+            type : 'POST', // type of request to send
+            url : '/get_preview' // url to send data to
+        })
+        .done(function(data) {
+            //$('#iframe').text(data.iframe); // show updated iframe
+            $('#lead_ad_preview').attr("src", data.iframe);  // "https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif"
+        });
+    }
+});
+
 /*
 show step 1 to user
 */
@@ -24,7 +50,9 @@ $(document).ready(function() {
             $('#lead_ad_generator_form_3').hide();
             $('#lead_ad_generator_form_1').show();
             $('#publish_lead_ad_button_div').hide();
-            //$('#lead_ad_preview').attr("src", data.iframe);  // "https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif"
+            $('#lead_ad_generator_menu div').first().css("background-color", "#4c637a");
+            $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#5d80a3");
+            $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#5d80a3");
         });
 
         event.preventDefault();
@@ -92,7 +120,10 @@ $(document).ready(function() {
             $('#lead_ad_generator_form_3').hide();
             $('#lead_ad_generator_form_2').show();
             $('#publish_lead_ad_button_div').hide();
-            //$('#lead_ad_preview').attr("src", data.iframe);  // "https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif"
+            $('#lead_ad_generator_menu div').first().css("background-color", "#5d80a3");
+            $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#4c637a");
+            $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#5d80a3");
+
         });
 
         event.preventDefault();
@@ -160,6 +191,9 @@ $(document).ready(function() {
             $('#lead_ad_generator_form_2').hide();
             $('#lead_ad_generator_form_3').show();
             $('#publish_lead_ad_button_div').show();
+            $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#4c637a");
+            $('#lead_ad_generator_menu div').first().css("background-color", "#5d80a3");
+            $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#5d80a3");
             //$('#lead_ad_preview').attr("src", data.iframe);  // "https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif"
         });
 

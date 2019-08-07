@@ -2,20 +2,22 @@
 
 {% block col1 %}
 
-<div class="container py-5" id="lead_ad_generator_form_1" style="display:block;">
-    <h6>Select Your Ad Account and Page</h6>
+<div class="container p-5" id="lead_ad_generator_form_1" style="display:block;">
+    <h4 class="pb-5">Select Your Ad Account and Page</h4>
     <form class="lead_ad_generator_form_1">
-        <div class="form-group">
-            <select id="ad_account" class="lead_ad" name="adaccountInput" autofocus>
-              {% for x in range(ad_account_count) %}
-              <option value='{{ adaccounts[x]["id"] }}''>{{ adaccounts[x]["name"] }}</option>
-              {% endfor %}
-            </select>
+        <div class="form-group pb-5">
+                <p class="">Ad Account</p>
+                <select id="ad_account" class="lead_ad form-control" name="adaccountInput" autofocus>
+                  {% for x in range(ad_account_count) %}
+                  <option class="form-control" value='{{ adaccounts[x]["id"] }}''>{{ adaccounts[x]["name"] }}</option>
+                  {% endfor %}
+                </select>
         </div>
-        <div class="form-group">
-            <select id="page" class="lead_ad" name="pageInput" autofocus>
+        <div class="form-group pb-5">
+            <p class="">Page</p>
+            <select id="page" class="lead_ad form-control" name="pageInput" autofocus>
               {% for x in range(page_count) %}
-              <option value='{{ pages[x]["id"] }}''>{{ pages[x]["name"] }}</option>
+              <option class="form-control" value='{{ pages[x]["id"] }}''>{{ pages[x]["name"] }}</option>
               {% endfor %}
             </select>
         </div>
@@ -23,52 +25,55 @@
 </div>
 
 <div class="container py-5" id="lead_ad_generator_form_2" style="display:none;">
-    <h6>Customize Your Lead Ad</h6>
+    <h4 class="pb-5">Enter Your Listing Details</h4>
     <form class="lead_ad_generator_form_2">
-        <div class="form-group">
+        <div class="form-group pb-5">
+              <p class="">Headline</p>
               <label class="sr-only" for="headline">Headline</label>
-              <input type="text" class="form-control" id="headline" placeholder="Headline" value="View All Pics, See Inside & Get Price">
+              <input type="text" class="form-control text-sm" id="headline" placeholder="Headline" value="View All Pics, See Inside & Get Price">
         </div>
-        <div class="form-group">
+        <div class="form-group pb-5">
+            <p class="">Listing Details</p>
               <label class="sr-only" for="text">Text</label>
-              <textarea id="text" class="form-control" aria-label="With textarea" name='adtext' rows="9">&#128293; NEW [CITY] area listing!! &#128293; &#13;&#13;BEDS: [BEDS] &#13;BATHS: [BATHS] &#13;SQ FT: [SQFT]&#13;&#13;&#127968;&#128273;&#127968;&#128273;&#127968;&#128273;&#13;&#13;To see the price, location, and more pictures, tap "Learn More"</textarea>
+              <textarea id="text" class="form-control" aria-label="With textarea" name='adtext' rows="11" cols="35">&#128293; New _____ area listing!! &#128293; &#13;&#13;BEDS: &#13;BATHS:  &#13;SQ FT: &#13;&#13;&#127968;&#128273;&#127968;&#128273;&#127968;&#128273;&#13;&#13;To see the price, location, and more pictures, tap "Learn More"</textarea>
               <!-- &#128293; NEW [CITY] area listing!! &#128293; &#13;BEDS: [BEDS] &#13;BATHS: [BATHS] &#13;SQ FT: [SQFT]&#13;&#13;&#127968;&#128273;&#127968;&#128273;&#127968;&#128273;&#13;&#13;To see the price, location, and more pictures, tap "Learn More" -->
         </div>
-        <div class="form-group">
+        <div class="form-group pb-5">
+              <p class="">Property Image</p>
               <label class="sr-only" for="text">Link to Image</label>
               <input type="text" class="form-control" id="image" placeholder="Image" value="https://drive.google.com/uc?id=1_pvz61BtsDM1T2n21oU9bRASNUG3BCak"> <!--value="https://drive.google.com/file/d/1_pvz61BtsDM1T2n21oU9bRASNUG3BCak/preview"-->
-              <small id="emailHelp" class="form-text text-muted"><a href="https://docs.google.com/document/d/1XR2b38j4g-nYfhp0TFdZRsTWPqV9bc_Y9bRudrlcrOw" class="alert-link" target="_blank">How To Get Image Link</a></small>
+              <small id="emailHelp" class="form-text text-white text-muted"><a href="https://docs.google.com/document/d/1XR2b38j4g-nYfhp0TFdZRsTWPqV9bc_Y9bRudrlcrOw" style="color:white;" target="_blank">How To Get Image Link</a></small>
         </div>
     </form>
 </div>
 
 <div class="container py-5" id="lead_ad_generator_form_3" style="display:none;">
-    <h6>Finish Your Lead Ad</h6>
+    <h4 class="pb-5">Publish Your Ad</h4>
     <form class="lead_ad_generator_form_3">
-        <div id="location" class="form-group">
+        <div id="location" class="form-group pb-5">
+             <p class="">Target City</p>
               <label id="location_query_box" class="secret sr-only" for="text"></label>
-              <input type="text" class="form-control input-sm" id="location_query" placeholder="location" value="">
-              <!--<div id="location_list" class="dropdown border border-secondary" style="display:none;">
-                  <!--<div class="dropdown-content">-->
+              <input type="text" class="form-control input-sm" id="location_query" placeholder="Charleston, SC, US" value="">
               <ul class="list-group">
               </ul>
         </div>
-        <div class="form-group">
-              <!-- https://getbootstrap.com/docs/4.3/components/input-group/ -->
-                <label for="validationServer01">Budget</label>
-                <select id="budget" class="custom-select" name="budget" required>
+        <div class="form-group pb-5">
+                <p class="">Budget</p>
+                <label class="sr-only" for="validationServer01"></label>
+                <select id="budget" class="custom-select form-control" name="budget" required>
                   <option value="500">$5</option>
                   <option value="2000" selected>$20</option>
                   <option value="5000">$50</option>
                 </select>
                 <div class="valid-feedback">Looks good!</div>
         </div>
-        <div class="form-group" style="display:none;">
+        <div class="form-group py-5 sr-only" style="display:none;">
               <label class="sr-only" for="privacyPolicy">Privacy Policy</label>
               <input type="text" class="form-control" id="privacy_policy" placeholder="Privacy Policy" value="LinkToTheProperty.com/PrivacyPolicy">
         </div>
-        <div id="lead_ad_generator_form_3_url" class="form-group">
-              <label class="sr-only" for="url">Url</label>
+        <div id="lead_ad_generator_form_3_url" class="form-group pb-5">
+              <p class="">Property URL</p>
+              <label class="sr-only" for="url"></label>
               <input type="text" class="form-control" id="url" placeholder="url" value="LinkToTheProperty.com">
         </div>
     </form>
@@ -103,9 +108,11 @@
     </div>
 
     <!-- iframe and button -->
-    <iframe id="lead_ad_preview" src="https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif" width="335" height="450" scrolling="yes" style="border:none;"></iframe>
+    <div id="iphone4">
+        <iframe id="lead_ad_preview" src="" scrolling="yes" style="border:none;"></iframe>
+    </div>
     <div id="publish_lead_ad_button_div" class="row justify-content-center" style="display:none;">
-        <input id="publish_lead_ad_button" class="btn btn-primary" type="submit" value="Publish Lead Ad" disabled>
+        <input id="publish_lead_ad_button" class="btn btn-primary" type="submit" value="Publish Your Ad" style="background-color: #4c637a; border: #4c637a; color: white;" disabled>
     </div>
 </div>
 {% endblock %}

@@ -5,28 +5,28 @@
 {% endblock %}
 
 {% block main %}
-<div>
-  <div class="row">
-    <div class="col-sm-4 text-center border p-0">
+<style> .navbar { display: none } </style>
+<div class="row h-100 text-white">
+    <div class="col-sm-4 text-center text-white" id="lead_ad_generator_left" style="background-color:#4c637a;">
         <!-- Add a 3 column row to represent the 3 steps of lead_ad_generator-->
-        <div id="lead_ad_generator_menu" class="container">
-            <div class="row">
-                <div class="col-sm border py-3">
-                    <p id="lead_ad_generator_step_1">1</p>
-                </div>
-                <div class="col-sm border py-3">
-                    <p id="lead_ad_generator_step_2">2</p>
-                </div>
-                <div class="col-sm border py-3">
-                    <span id="lead_ad_generator_step_3">3</span>
-                </div>
+        <div id="lead_ad_generator_menu" class="row">
+            <div id="lead_ad_generator_step_1" class="col-sm-4 py-4" style="background-color:#4c637a; border: 1px solid #4c637a;">
+                <img src="https://cdn4.iconfinder.com/data/icons/basic-user-interface-elements/700/paste-clipboard-copy-512.png" alt="pen" style="filter: brightness(0) invert(1);" height="40">
+            </div>
+            <div id="lead_ad_generator_step_2" class="col-sm-4 py-4" style="background-color:#5d80a3; border: 1px solid #4c637a;">
+                <img src="https://cdn4.iconfinder.com/data/icons/basic-user-interface-elements/700/home-house-homepage-building-512.png" alt="pen" style="filter: brightness(0) invert(1);" height="40">
+            </div>
+            <div id="lead_ad_generator_step_3" class="col-sm-4 py-4" style="background-color:#5d80a3; border: 1px solid #4c637a;">
+                <img src="https://cdn4.iconfinder.com/data/icons/basic-user-interface-elements/700/export-share-upload-512.png" alt="pen" style="filter: brightness(0) invert(1);" height="40">
             </div>
         </div>
-        {% block col1 %}{% endblock %}
+        <div class="row">
+            {% block col1 %}{% endblock %}
+        </div>
     </div>
-    <div class="col-sm text-center border p-5">
-      {% block col2 %}{% endblock %}
+
+    <div class="col-sm-8 text-center p-5 d-flex align-items-center" id="lead_ad_generator_right" style="background-image: linear-gradient(to bottom right, #5c9cdb, LightBlue);">
+         {% block col2 %}{% endblock %}
     </div>
-  </div>
 </div>
 {% endblock %}
