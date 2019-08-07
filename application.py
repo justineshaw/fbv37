@@ -334,8 +334,6 @@ def index():
                 list.append(iframe)
 
             print(list)
-            print(list[0])
-            print(list[1])
             return render_template("index.html", iframes=list, count=small)
             #return render_template("index.html", count=1, iframe=iframe)
         return redirect('/lead_ad_generator')
