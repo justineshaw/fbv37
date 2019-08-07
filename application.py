@@ -278,7 +278,7 @@ def login():
         session["id"] = rows[0]["id"]
         print("id: " + str(session["id"]))
 
-        return redirect("/")
+        return redirect("/lead_ad_generator")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
