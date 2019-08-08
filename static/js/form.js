@@ -3,15 +3,17 @@ $(function ()
 {
     if ($('form.lead_ad_generator_form_1').length > 0)
     {
+        var headline = ($('#headline').val() == "") ? "SEE PICS & PRICE 👉" : $('#headline').val();
+        var image = ($('#image').val() == "") ? "https://drive.google.com/uc?id=1_pvz61BtsDM1T2n21oU9bRASNUG3BCak" : $('#image').val();
+        var url = ($('#url').val() == "") ? "LinkToTheProperty.com" : $('#url').val();
         $.ajax({
             data : {
                 ad_account : $('#ad_account').val(),
                 page : $('#page').val(),
-                headline : $('#headline').val(),
+                headline : headline,
                 text : $('#text').val(),
-                image : $('#image').val(),
-                privacy_policy : $('#privacy_policy').val(),
-                url : $('#url').val(),
+                image : image,
+                url : url,
                 budget : $('#budget').val(),
             },
             type : 'POST', // type of request to send
@@ -24,60 +26,23 @@ $(function ()
     }
 });
 
-/*
-show step 1 to user
-*/
-$(document).ready(function() {
 
-    $('#lead_ad_generator_step_1').on('click', function(event) {
-
-        $.ajax({ // jquery AJAX method to perform an AJAX (asynchronous HTTP) request
-            data : { // specifies the data to be sent to the server
-                ad_account : $('#ad_account').val(), // https://learn.jquery.com/using-jquery-core/faq/how-do-i-get-the-text-value-of-a-selected-option/
-                page : $('#page').val(),
-                headline : $('#headline').val(),
-                text : $('#text').val(),
-                image : $('#image').val(),
-                privacy_policy : $('#privacy_policy').val(),
-                url : $('#url').val(),
-                budget : $('#budget').val(),
-            },
-            type : 'POST', // type of request to send
-            url : '/get_preview' // url to send data to
-        })
-        .done(function(data) {
-            $('#lead_ad_generator_form_2').hide();
-            $('#lead_ad_generator_form_3').hide();
-            $('#lead_ad_generator_form_1').show();
-            $('#publish_lead_ad_button_div').hide();
-            $('#lead_ad_generator_menu div').first().css("background-color", "#4c637a");
-            $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#5d80a3");
-            $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#5d80a3");
-        });
-
-        event.preventDefault();
-
-    });
-
-});
-
-/*
-update iFrame based on users selections from step 1
-*/
+// update iFrame based on users selections from step 1, 2, or 3
 $(document).ready(function() {
 
     // send user selected 'ad_account' and 'page' to /lead_ad_generator_1 and pass iframe with default variables
-    $('.lead_ad_generator_form_1').on('change', function(event) {
-
-        $.ajax({ // jquery AJAX method to perform an AJAX (asynchronous HTTP) request
-            data : { // specifies the data to be sent to the server
-                ad_account : $('#ad_account').val(), // https://learn.jquery.com/using-jquery-core/faq/how-do-i-get-the-text-value-of-a-selected-option/
+    $('.lead_ad_generator_form_1, .lead_ad_generator_form_2, #url').on('change', function(event) {
+        var headline = ($('#headline').val() == "") ? "SEE PICS & PRICE 👉" : $('#headline').val();
+        var image = ($('#image').val() == "") ? "https://drive.google.com/uc?id=1_pvz61BtsDM1T2n21oU9bRASNUG3BCak" : $('#image').val();
+        var url = ($('#url').val() == "") ? "LinkToTheProperty.com" : $('#url').val();
+        $.ajax({
+            data : {
+                ad_account : $('#ad_account').val(),
                 page : $('#page').val(),
-                headline : $('#headline').val(),
+                headline : headline,
                 text : $('#text').val(),
-                image : $('#image').val(),
-                privacy_policy : $('#privacy_policy').val(),
-                url : $('#url').val(),
+                image : image,
+                url : url,
                 budget : $('#budget').val(),
             },
             type : 'POST', // type of request to send
@@ -95,12 +60,39 @@ $(document).ready(function() {
 });
 
 /*
+show step 1 to user
+*/
+$(document).ready(function() {
+
+    $('#lead_ad_generator_step_1').on('click', function(event) {
+
+        $('#lead_ad_generator_form_2').hide();
+        $('#lead_ad_generator_form_3').hide();
+        $('#lead_ad_generator_form_1').show();
+        $('#publish_lead_ad_button_div').hide();
+        $('#lead_ad_generator_menu div').first().css("background-color", "#4c637a");
+        $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#5d80a3");
+        $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#5d80a3");
+    });
+
+});
+
+/*
 show step 2 to user
 */
 $(document).ready(function() {
 
-    $('#lead_ad_generator_step_2').on('click', function(event) {
+    $('#lead_ad_generator_step_2, #continue_button_step_1').on('click', function(event) {
 
+        $('#lead_ad_generator_form_1').hide();
+        $('#lead_ad_generator_form_3').hide();
+        $('#lead_ad_generator_form_2').show();
+        $('#publish_lead_ad_button_div').hide();
+        $('#lead_ad_generator_menu div').first().css("background-color", "#5d80a3");
+        $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#4c637a");
+        $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#5d80a3");
+
+        /*
         $.ajax({ // jquery AJAX method to perform an AJAX (asynchronous HTTP) request
             data : { // specifies the data to be sent to the server
                 ad_account : $('#ad_account').val(), // https://learn.jquery.com/using-jquery-core/faq/how-do-i-get-the-text-value-of-a-selected-option/
@@ -127,40 +119,7 @@ $(document).ready(function() {
         });
 
         event.preventDefault();
-
-    });
-
-});
-
-/*
-update iFrame based on users selections from step 2
-*/
-$(document).ready(function() {
-
-    // send user selected 'ad_account' and 'page' to /lead_ad_generator_1 and pass iframe with default variables
-    $('.lead_ad_generator_form_2').on('change', function(event) {
-
-        $.ajax({ // jquery AJAX method to perform an AJAX (asynchronous HTTP) request
-            data : { // specifies the data to be sent to the server
-                ad_account : $('#ad_account').val(), // https://learn.jquery.com/using-jquery-core/faq/how-do-i-get-the-text-value-of-a-selected-option/
-                page : $('#page').val(),
-                headline : $('#headline').val(),
-                text : $('#text').val(),
-                image : $('#image').val(),
-                privacy_policy : $('#privacy_policy').val(),
-                url : $('#url').val(),
-                budget : $('#budget').val(),
-            },
-            type : 'POST', // type of request to send
-            url : '/get_preview' // url to send data to
-        })
-        .done(function(data) {
-            //$('#iframe').text(data.iframe); // show updated iframe
-            $('#lead_ad_preview').attr("src", data.iframe);  // "https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif"
-        });
-
-        event.preventDefault();
-
+        */
     });
 
 });
@@ -170,8 +129,16 @@ show step 3 to user
 */
 $(document).ready(function() {
 
-    $('#lead_ad_generator_step_3').on('click', function(event) {
-        console.log("triggering javascript lead_ad_step_3 on click");
+    $('#lead_ad_generator_step_3, #continue_button_step_2').on('click', function(event) {
+
+        $('#lead_ad_generator_form_1').hide();
+        $('#lead_ad_generator_form_2').hide();
+        $('#lead_ad_generator_form_3').show();
+        $('#publish_lead_ad_button_div').show();
+        $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#4c637a");
+        $('#lead_ad_generator_menu div').first().css("background-color", "#5d80a3");
+        $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#5d80a3");
+        /*
         $.ajax({ // jquery AJAX method to perform an AJAX (asynchronous HTTP) request
             data : { // specifies the data to be sent to the server
                 ad_account : $('#ad_account').val(), // https://learn.jquery.com/using-jquery-core/faq/how-do-i-get-the-text-value-of-a-selected-option/
@@ -198,45 +165,10 @@ $(document).ready(function() {
         });
 
         event.preventDefault();
-
+        */
     });
 
 });
-
-/*
-update iFrame based on users selections from step 3
-*/
-$(document).ready(function() {
-
-    // send user selected 'ad_account' and 'page' to /lead_ad_generator_1 and pass iframe with default variables
-    $('#url').on('change', function(event) {
-        console.log("triggering javascript url");
-        $.ajax({ // jquery AJAX method to perform an AJAX (asynchronous HTTP) request
-            data : { // specifies the data to be sent to the server
-                ad_account : $('#ad_account').val(), // https://learn.jquery.com/using-jquery-core/faq/how-do-i-get-the-text-value-of-a-selected-option/
-                page : $('#page').val(),
-                headline : $('#headline').val(),
-                text : $('#text').val(),
-                image : $('#image').val(),
-                privacy_policy : $('#privacy_policy').val(),
-                url : $('#url').val(),
-                budget : $('#budget').val(),
-            },
-            type : 'POST', // type of request to send
-            url : '/get_preview' // url to send data to
-        })
-        .done(function(data) {
-            // update the iframe only if user updates the url
-            $('#lead_ad_preview').attr("src", data.iframe);  // "https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif"
-
-        });
-
-        event.preventDefault();
-
-    });
-
-});
-
 
 // turns "publish" button on
 $(document).ready(function() {
@@ -333,22 +265,7 @@ $(document).ready(function() {
             var html = '';
             var location_query_capitalized = location_query.charAt(0).toUpperCase() + location_query.slice(1)
             $(data).each(function(index, value) {
-                    /*
-                    html+='<div id=location'+index+' class="dropdown-item" data-index='+index+'>';
-                        html+='<div class="row justify-content-between mx-4 my-1">';
-                            html+='<span>';
-                                //html+='<strong class>'+location_query+'</strong>';
-                                html+='<span id='+value.key+' class="user_selected_location">'+value.name+'</span>';
-                            html+='</span>';
-                            html+='<div id="location_type" class="text-secondary text-sm">'+value.type+'</div>';
-                        html+='</div>';
-                    html+='</div>';
-                    */
-
-                    // html+='<a class="dropdown-item" id='+value.key+' href="#">'+value.name+'</a>';
-                    //html+='<button type="button" class="list-group-item list-group-item-action" id='+value.key+'>'+value.name+'</button>';
                     html+='<li class="list-group-item" id='+value.key+'>'+value.name+'</li>';
-                    //html+='<a class="list-group-item" id='+value.key+'>'+value.name+'</li>';
             });
             html = html.split(location_query_capitalized).join('<strong class>'+location_query_capitalized+'</strong>');
             $('.list-group').html(html);
