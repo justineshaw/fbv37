@@ -6,6 +6,9 @@ $(function ()
         var headline = ($('#headline').val() == "") ? "SEE PICS & PRICE 👉" : $('#headline').val();
         var image = ($('#image').val() == "") ? "https://drive.google.com/uc?id=1_pvz61BtsDM1T2n21oU9bRASNUG3BCak" : $('#image').val();
         var url = ($('#url').val() == "") ? "LinkToTheProperty.com" : $('#url').val();
+        console.log(headline);
+        console.log(image);
+        console.log(url);
         $.ajax({
             data : {
                 ad_account : $('#ad_account').val(),
@@ -170,6 +173,7 @@ $(document).ready(function() {
 
 });
 
+/*
 // turns "publish" button on
 $(document).ready(function() {
 
@@ -192,7 +196,7 @@ $(document).ready(function() {
 
 
 });
-
+*/
 // when user clicks "publish" button, data is sent to facebook
 $(document).ready(function() {
 
