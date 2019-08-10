@@ -1,17 +1,20 @@
 {% extends "lead_ad_generator_layout.html" %}
 
 {% block col1 %}
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
 <div class="container p-5" id="lead_ad_generator_form_1" style="display:block;">
     <h4 class="pb-5">Select Your Ad Account and Page</h4>
-    <form class="lead_ad_generator_form_1">
-        <div class="form-group pb-3">
+    <form class="lead_ad_generator_form_1 was-validated">
+        <div id="ad_account_div" class="form-group pb-3">
                 <p class="">Ad Account</p>
                 <select id="ad_account" class="lead_ad form-control" name="adaccountInput" autofocus>
                   {% for x in range(ad_account_count) %}
                   <option class="form-control" value='{{ adaccounts[x]["id"] }}''>{{ adaccounts[x]["name"] }}</option>
                   {% endfor %}
                 </select>
+                <div class="valid-feedback">Ad account selected.</div>
+                <div class="invalid-feedback">Please select an ad account.</div>
         </div>
         <div class="form-group pb-3">
             <p class="">Page</p>
@@ -20,51 +23,83 @@
               <option class="form-control" value='{{ pages[x]["id"] }}''>{{ pages[x]["name"] }}</option>
               {% endfor %}
             </select>
+            <div class="valid-feedback">Page selected.</div>
+            <div class="invalid-feedback">Please select a page.</div>
         </div>
         <div id="continue_button_step_1_div" class="row justify-content-center">
-            <input id="continue_button_step_1" class="btn btn-primary" type="button" value="Continue" style="background-color: #5d80a3; border: #5d80a3; color: white;">
+            <button id="continue_button_step_1" class="btn btn-primary" type="button" value="Continue" style="background-color: #5d80a3; border: #5d80a3; color: white;">Continue</button>
         </div>
     </form>
 </div>
 
 <div class="container py-5" id="lead_ad_generator_form_2" style="display:none;">
     <h4 class="pb-5">Enter Your Listing Details</h4>
-    <form class="lead_ad_generator_form_2">
+    <!--<form class="lead_ad_generator_form_2">-->
+    <form class="col-md-12 px-5 was-validated">
         <div class="form-group pb-3">
               <p class="">Headline</p>
+              <div class="help-icon" data-toggle="popover" data-trigger="hover" data-content="Appears below the ad image on the right. The default headline has proven results so no need to change this part.">
+                  <span>?</span>
+              </div>
               <label class="sr-only" for="headline">Headline</label>
               <input type="text" class="form-control text-sm" id="headline" placeholder="SEE PICS & PRICE &#128073;" value="">
+              <div class="valid-feedback">Headline created.</div>
+              <div class="invalid-feedback">Please create a headline.</div>
         </div>
         <div class="form-group pb-3">
-            <p class="">Listing Details</p>
-              <label class="sr-only" for="text">Text</label>
-              <textarea id="text" class="form-control" aria-label="With textarea" name='adtext' rows="11" cols="35">&#128293; New _____ area listing!! &#128293; &#13;&#13;BEDS: &#13;BATHS:  &#13;SQ FT: &#13;&#13;&#127968;&#128273;&#127968;&#128273;&#127968;&#128273;&#13;&#13;To see the price, location, and more pictures, tap "Learn More"</textarea>
-              <!-- &#128293; NEW [CITY] area listing!! &#128293; &#13;BEDS: [BEDS] &#13;BATHS: [BATHS] &#13;SQ FT: [SQFT]&#13;&#13;&#127968;&#128273;&#127968;&#128273;&#127968;&#128273;&#13;&#13;To see the price, location, and more pictures, tap "Learn More" -->
+            <p class="">Listing Template</p>
+            <div class="help-icon" data-toggle="popover" data-trigger="hover" data-content="This template has proven results. See the example text to the right about the image. Just replace CITY with your city. Also, add a number next to beds, baths and sqft for your listing. Get ready to see AWESOME results!">
+                <span>?</span>
+            </div>
+            <label class="sr-only" for="text">Text</label>
+            <textarea id="text" class="form-control" aria-label="With textarea" name='adtext' rows="7" cols="28">&#128293; New CITY area listing!! &#128293; &#13;&#13;BEDS: &#13;BATHS:  &#13;SQ FT: &#13;&#13;&#127968;&#128273;&#127968;&#128273;&#127968;&#128273;&#13;&#13;To see the price, location, and more pictures, tap "Learn More"</textarea>
+            <div id="invalid_text" class="invalid">Please customize your listing template.</div>
+            <div id="valid_text" class="valid" style="display:none;">Listing template customized.</div>
         </div>
         <div class="form-group pb-3">
-              <p class="">Property Image</p>
-              <label class="sr-only" for="text">Link to Image</label>
-              <input type="text" class="form-control" id="image" placeholder="https://drive.google.com/uc?id=1_pvz61BtsDM1T2n21oU9bRASNUG3BCak" value=""> <!--value="https://drive.google.com/file/d/1_pvz61BtsDM1T2n21oU9bRASNUG3BCak/preview"-->
-              <small id="emailHelp" class="form-text text-white text-muted"><a href="https://docs.google.com/document/d/1XR2b38j4g-nYfhp0TFdZRsTWPqV9bc_Y9bRudrlcrOw" style="color:white;" target="_blank">How To Get Image Link</a></small>
+            <p class="">Property Image</p>
+            <div class="help-icon" data-toggle="popover" data-trigger="hover" data-content="Replace the image with an image of your listing. It's simple. Just upload the image from your computer by clicking 'Upload'.">
+                <span>?</span>
+            </div>
+            <div class="input-group">
+                <span class="input-group-btn" style="background-color: white; color: #495057;">
+                    <span class="btn btn-default btn-file">
+                        Upload...<input type="file" id="imgInp" value="text" placeholder="text">
+                    </span>
+                </span>
+                <input type="text" class="form-control" id="image" placeholder="123MainStreet.png" value="" readonly>
+            </div>
+            <div id="invalid_image" class="invalid">Please upload a property image.</div>
+            <div id="valid_image" class="valid" style="display:none;">Image uploaded.</div>
         </div>
+
+
         <div id="continue_button_step_2_div" class="row justify-content-center">
-            <input id="continue_button_step_2" class="btn btn-primary" type="button" value="Continue" style="background-color: #5d80a3; border: #5d80a3; color: white;">
+            <button id="continue_button_step_2" class="btn btn-primary" type="button" value="Continue" style="background-color: #5d80a3; border: #5d80a3; color: white;">Continue</button>
         </div>
     </form>
 </div>
 
 <div class="container py-5" id="lead_ad_generator_form_3" style="display:none;">
     <h4 class="pb-5">Publish Your Ad</h4>
-    <form class="lead_ad_generator_form_3">
+    <form class="lead_ad_generator_form_3 col-md-12 px-5 was-validated">
         <div id="location" class="form-group pb-3">
              <p class="">Target City</p>
+             <div class="help-icon" data-toggle="popover" data-trigger="hover" data-content="This searches every city in the US. Start typing your city...">
+                 <span>?</span>
+             </div>
               <label id="location_query_box" class="secret sr-only" for="text"></label>
-              <input type="text" class="form-control input-sm" id="location_query" placeholder="Charleston, SC, US" value="">
+              <input type="text" class="form-control input-sm" id="location_query" placeholder="New York City, NY, US" value="">
               <ul class="list-group" style="color:#212529;">
               </ul>
+              <div id="invalid_location" class="invalid">Type your Target City...</div>
+              <div id="valid_location" class="valid" style="display:none;">Target City selected.</div>
         </div>
         <div class="form-group pb-3">
                 <p class="">Budget</p>
+                <div class="help-icon" data-toggle="popover" data-trigger="hover" data-content="The amount you want to spend on leads. On average, leads cost less than $3 each!">
+                    <span>?</span>
+                </div>
                 <label class="sr-only" for="validationServer01"></label>
                 <select id="budget" class="custom-select form-control" name="budget" required>
                   <option value="500">$5</option>
@@ -75,11 +110,16 @@
         </div>
         <div id="lead_ad_generator_form_3_url" class="form-group pb-5">
               <p class="">Property URL</p>
+              <div class="help-icon" data-toggle="popover" data-trigger="hover" data-content="The website you want to send leads to when they click your ad. We see the best results when this is a link to the listing.">
+                  <span>?</span>
+              </div>
               <label class="sr-only" for="url"></label>
               <input type="text" class="form-control" id="url" placeholder="LinkToTheProperty.com" value="">
+              <div id="invalid_url" class="invalid">Type your Property URL.</div>
+              <div id="valid_url" class="valid" style="display:none;">Entered Property URL.</div>
         </div>
         <div id="publish_lead_ad_button_div" class="row justify-content-center" style="display:none;">
-            <input id="publish_lead_ad_button" class="btn btn-primary" type="submit" value="Publish Your Ad" style="background-color: #5d80a3; border: #5d80a3; color: white;">
+            <button id="publish_lead_ad_button" class="btn btn-primary" type="submit" value="Publish Your Ad" style="background-color: #5d80a3; border: #5d80a3; color: white;">Publish My Ad!</button>
         </div>
     </form>
 </div>

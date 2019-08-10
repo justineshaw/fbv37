@@ -60,6 +60,10 @@ from facebook_business.adobjects.user import User
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, From, To
 
+import cloudinary
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
+
 # set path to environment variables
 # env_path = Path('.env')
 # load_dotenv(dotenv_path=env_path)
@@ -422,13 +426,14 @@ def get_location():
 def get_preview():
 
     # gather all necessary variables
+    image_url = request.form['image']
+    print(image_url)
     ad_account = request.form['ad_account']
     page = request.form['page']
     headline = request.form['headline']
     text = request.form['text']
     url = request.form['url']
     budget = request.form['budget']
-    image_url = request.form['image']
 
     # generate preview
     # reference on generating an ad preview from a non-existing ad: https://developers.facebook.com/docs/marketing-api/generatepreview/v3.2
@@ -725,7 +730,11 @@ def publish_ad():
         error = "Whoops! Error Publishing The Ad."
         if e.body():
             error = e.body()
+            print(error)
             error = error['error']['error_user_msg']
+            if error == "Please add a valid payment method to your ad account.":
+                error = "Please add a valid payment method: " + "https://www.facebook.com/ads/manager/account_settings/account_billing/?act=" + ad_account + "&pid=p1&page=account_settings&tab=account_billing_settings"
+                return jsonify({'error' : error})
         return jsonify({'error' : error})  # return facebook-specific error message if there is one
 
 @app.route('/set_email', methods=['POST'])

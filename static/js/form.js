@@ -1,49 +1,19 @@
-// load preview on first page load
-$(function ()
-{
-    if ($('form.lead_ad_generator_form_1').length > 0)
-    {
-        var headline = ($('#headline').val() == "") ? "SEE PICS & PRICE 👉" : $('#headline').val();
-        var image = ($('#image').val() == "") ? "https://drive.google.com/uc?id=1_pvz61BtsDM1T2n21oU9bRASNUG3BCak" : $('#image').val();
-        var url = ($('#url').val() == "") ? "LinkToTheProperty.com" : $('#url').val();
-        console.log(headline);
-        console.log(image);
-        console.log(url);
-        $.ajax({
-            data : {
-                ad_account : $('#ad_account').val(),
-                page : $('#page').val(),
-                headline : headline,
-                text : $('#text').val(),
-                image : image,
-                url : url,
-                budget : $('#budget').val(),
-            },
-            type : 'POST', // type of request to send
-            url : '/get_preview' // url to send data to
-        })
-        .done(function(data) {
-            //$('#iframe').text(data.iframe); // show updated iframe
-            $('#lead_ad_preview').attr("src", data.iframe);  // "https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif"
-        });
-    }
-});
-
-
-// update iFrame based on users selections from step 1, 2, or 3
+// update iFrame
 $(document).ready(function() {
 
-    // send user selected 'ad_account' and 'page' to /lead_ad_generator_1 and pass iframe with default variables
-    $('.lead_ad_generator_form_1, .lead_ad_generator_form_2, #url').on('change', function(event) {
+    // send data to /get_preview and send iframe to HTML
+    function getPreview() {
         var headline = ($('#headline').val() == "") ? "SEE PICS & PRICE 👉" : $('#headline').val();
         var image = ($('#image').val() == "") ? "https://drive.google.com/uc?id=1_pvz61BtsDM1T2n21oU9bRASNUG3BCak" : $('#image').val();
         var url = ($('#url').val() == "") ? "LinkToTheProperty.com" : $('#url').val();
+        var text = ($('#text').val() == '🔥 New CITY area listing!! 🔥 \n\nBEDS: \nBATHS:  \nSQ FT: \n\n🏠🔑🏠🔑🏠🔑\n\nTo see the price, location, and more pictures, tap "Learn More"') ? '🔥 New NEW YORK area listing!! 🔥 \n\nBEDS: 2 \nBATHS: 3  \nSQ FT: 2100 \n\n🏠🔑🏠🔑🏠🔑\n\nTo see the price, location, and more pictures, tap "Learn More"' : $('#text').val();
+        console.log(image);
         $.ajax({
             data : {
                 ad_account : $('#ad_account').val(),
                 page : $('#page').val(),
                 headline : headline,
-                text : $('#text').val(),
+                text : text,
                 image : image,
                 url : url,
                 budget : $('#budget').val(),
@@ -55,35 +25,110 @@ $(document).ready(function() {
             //$('#iframe').text(data.iframe); // show updated iframe
             $('#lead_ad_preview').attr("src", data.iframe);  // "https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif"
         });
+    };
 
-        event.preventDefault();
+    // load preview on first page load
+    if ($('form.lead_ad_generator_form_1').length > 0)
+    {
+        getPreview();
+    }
 
+    // load preview each time a relevant field is changed
+    $('#page, #headline').on('change', function(event) {
+        getPreview();
+    });
+
+    // validate user input
+    $('#text').on('change', function(event) {
+        $('#invalid_text').hide();
+        $('#valid_text').show();
+        getPreview();
+    });
+    $('#url').on('change', function(event) {
+        $('#invalid_url').hide();
+        $('#valid_url').show();
+        getPreview();
+    });
+
+    // load user uploaded image
+    $(document).on('change', '.btn-file :file', function() {
+        var input = $(this),
+        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+        input.trigger('fileselect', [label]);
+    });
+
+    $('.btn-file :file').on('fileselect', function(event, label) {
+
+        var input = $(this).parents('.input-group').find(':text'),
+            log = label;
+
+        if( input.length ) {
+            input.val(log);
+        } else {
+            if( log ) alert(log);
+        }
+
+    });
+
+    // send user uploaded image to cloudinary and get back uploaded image link
+    function readURL(input) {
+        console.log("uploading photo...");
+        // var CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dhzcvp1gh/upload';
+        var CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dhzcvp1gh/image/upload';
+        var CLOUDINARY_UPLOAD_PRESET = 'omqjgbu0';
+        var file = event.target.files[0];
+        var formData = new FormData();
+        formData.append('file', file); // add file to FormData
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        $('#valid_image').text("Uploading Image..");
+        axios({
+            url: CLOUDINARY_URL,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data: formData
+        }).then(function(res) {
+            $('#image').val(res.data.secure_url);
+            $('#valid_image').text("Upload Successful.");
+            getPreview();
+        }).catch(function(err) {
+            //$('#image').val('https://res.cloudinary.com/dhzcvp1gh/image/upload/v1565444311/cxvuqosctw4z3qydmahx.png');
+            //getPreview();
+            console.error(err);
+            $('#valid_image').hide();
+            $('#invalid_image').text("Error uploading image: (" + err + ")").show();
+        });
+    };
+
+    $("#imgInp").change(function(){
+        $('#invalid_image').hide();
+        $('#valid_image').text("Uploading Image.").show();
+        readURL(this);
     });
 
 });
 
-/*
-show step 1 to user
-*/
-$(document).ready(function() {
+// popovers
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover()
+});
 
+
+// show left menu to user for each step
+$(document).ready(function() {
+    var selected_color = '#4C637A';
+    var deselected_color = '#C79031';
     $('#lead_ad_generator_step_1').on('click', function(event) {
 
         $('#lead_ad_generator_form_2').hide();
         $('#lead_ad_generator_form_3').hide();
         $('#lead_ad_generator_form_1').show();
         $('#publish_lead_ad_button_div').hide();
-        $('#lead_ad_generator_menu div').first().css("background-color", "#4c637a");
-        $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#5d80a3");
-        $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#5d80a3");
+        $('#lead_ad_generator_menu div').first().css("background-color", selected_color);
+        $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", deselected_color);
+        $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", deselected_color);
     });
-
-});
-
-/*
-show step 2 to user
-*/
-$(document).ready(function() {
 
     $('#lead_ad_generator_step_2, #continue_button_step_1').on('click', function(event) {
 
@@ -91,46 +136,10 @@ $(document).ready(function() {
         $('#lead_ad_generator_form_3').hide();
         $('#lead_ad_generator_form_2').show();
         $('#publish_lead_ad_button_div').hide();
-        $('#lead_ad_generator_menu div').first().css("background-color", "#5d80a3");
-        $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#4c637a");
-        $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#5d80a3");
-
-        /*
-        $.ajax({ // jquery AJAX method to perform an AJAX (asynchronous HTTP) request
-            data : { // specifies the data to be sent to the server
-                ad_account : $('#ad_account').val(), // https://learn.jquery.com/using-jquery-core/faq/how-do-i-get-the-text-value-of-a-selected-option/
-                page : $('#page').val(),
-                headline : $('#headline').val(),
-                text : $('#text').val(),
-                image : $('#image').val(),
-                privacy_policy : $('#privacy_policy').val(),
-                url : $('#url').val(),
-                budget : $('#budget').val(),
-            },
-            type : 'POST', // type of request to send
-            url : '/get_preview' // url to send data to
-        })
-        .done(function(data) {
-            $('#lead_ad_generator_form_1').hide();
-            $('#lead_ad_generator_form_3').hide();
-            $('#lead_ad_generator_form_2').show();
-            $('#publish_lead_ad_button_div').hide();
-            $('#lead_ad_generator_menu div').first().css("background-color", "#5d80a3");
-            $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#4c637a");
-            $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#5d80a3");
-
-        });
-
-        event.preventDefault();
-        */
+        $('#lead_ad_generator_menu div').first().css("background-color", deselected_color);
+        $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", selected_color);
+        $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", deselected_color);
     });
-
-});
-
-/*
-show step 3 to user
-*/
-$(document).ready(function() {
 
     $('#lead_ad_generator_step_3, #continue_button_step_2').on('click', function(event) {
 
@@ -138,37 +147,9 @@ $(document).ready(function() {
         $('#lead_ad_generator_form_2').hide();
         $('#lead_ad_generator_form_3').show();
         $('#publish_lead_ad_button_div').show();
-        $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#4c637a");
-        $('#lead_ad_generator_menu div').first().css("background-color", "#5d80a3");
-        $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#5d80a3");
-        /*
-        $.ajax({ // jquery AJAX method to perform an AJAX (asynchronous HTTP) request
-            data : { // specifies the data to be sent to the server
-                ad_account : $('#ad_account').val(), // https://learn.jquery.com/using-jquery-core/faq/how-do-i-get-the-text-value-of-a-selected-option/
-                page : $('#page').val(),
-                headline : $('#headline').val(),
-                text : $('#text').val(),
-                image : $('#image').val(),
-                privacy_policy : $('#privacy_policy').val(),
-                url : $('#url').val(),
-                budget : $('#budget').val(),
-            },
-            type : 'POST', // type of request to send
-            url : '/get_preview' // url to send data to
-        })
-        .done(function(data) {
-            $('#lead_ad_generator_form_1').hide();
-            $('#lead_ad_generator_form_2').hide();
-            $('#lead_ad_generator_form_3').show();
-            $('#publish_lead_ad_button_div').show();
-            $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", "#4c637a");
-            $('#lead_ad_generator_menu div').first().css("background-color", "#5d80a3");
-            $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", "#5d80a3");
-            //$('#lead_ad_preview').attr("src", data.iframe);  // "https://cdn-img.meetedgar.com/wp-content/uploads/2017/07/Mr-DNA.gif"
-        });
-
-        event.preventDefault();
-        */
+        $('#lead_ad_generator_menu div:nth-child(3)').css("background-color", selected_color);
+        $('#lead_ad_generator_menu div').first().css("background-color", deselected_color);
+        $('#lead_ad_generator_menu div:nth-child(2)').css("background-color", deselected_color);
     });
 
 });
@@ -286,6 +267,8 @@ $(document).ready(function() {
                  $('#location_query').val($this.text()); // update value with user selected name
                  $('.secret.sr-only').attr("id", $this.attr('id')); // update id with user selected id by referencing the class
                  $('.list-group').hide();
+                 $('#invalid_location').hide();
+                 $('#valid_location').show();
                },
              });
 
