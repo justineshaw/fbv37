@@ -867,7 +867,7 @@ if __name__ == '__main__':
     app.debug = False
     port = int(os.environ.get('PORT', 5000))
     # production mode
-    #app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port)
 
     # development mode
-    app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode
+    # app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode
