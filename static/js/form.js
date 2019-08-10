@@ -205,7 +205,14 @@ $(document).ready(function() {
                 $('#toserrorAlert').show();
             }
             else if (data.error != "") { // ad did not publish
-                $('#errorAlert').text(data.error).show(); // print facebook-specific error message
+
+                if (data.url) { // print no credit card error message
+                    $('#errorAlertLink a').attr('href', data.url); // print facebook-specific error message
+                    $('#errorAlertLink').show(); // print facebook-specific error message
+                }
+                else {
+                    $('#errorAlert').text(data.error).show(); // print facebook-specific error message
+                }
             }
             else { // ad published successfully
                 // remove ability for user to edit ad

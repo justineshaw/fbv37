@@ -733,8 +733,11 @@ def publish_ad():
             print(error)
             error = error['error']['error_user_msg']
             if error == "Please add a valid payment method to your ad account.":
-                error = "Please add a valid payment method: " + "https://www.facebook.com/ads/manager/account_settings/account_billing/?act=" + ad_account + "&pid=p1&page=account_settings&tab=account_billing_settings"
-                return jsonify({'error' : error})
+                id = ad_account.replace("act_", "") #act_355306888659087
+                print(id)
+                url = "https://www.facebook.com/ads/manager/account_settings/account_billing/?act=" + id + "&pid=p1&page=account_settings&tab=account_billing_settings"
+
+                return jsonify({'error' : error, 'url' : url})
         return jsonify({'error' : error})  # return facebook-specific error message if there is one
 
 @app.route('/set_email', methods=['POST'])
@@ -864,7 +867,7 @@ if __name__ == '__main__':
     app.debug = False
     port = int(os.environ.get('PORT', 5000))
     # production mode
-    app.run(host='0.0.0.0', port=port)
+    #app.run(host='0.0.0.0', port=port)
 
     # development mode
-    # app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode
+    app.run(ssl_context='adhoc', host='0.0.0.0', port=port) # development mode
