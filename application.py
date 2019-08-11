@@ -736,7 +736,7 @@ def publish_ad():
                 id = ad_account.replace("act_", "") #act_355306888659087
                 print(id)
                 url = "https://www.facebook.com/ads/manager/account_settings/account_billing/?act=" + id + "&pid=p1&page=account_settings&tab=account_billing_settings"
-
+                print(url)
                 return jsonify({'error' : error, 'url' : url})
         return jsonify({'error' : error})  # return facebook-specific error message if there is one
 

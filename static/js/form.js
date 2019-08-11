@@ -201,16 +201,21 @@ $(document).ready(function() {
         .done(function(data) {
 
             // if error variable is anything but an empty string throw an error message and allow user to make edits
+            console.log(data);
+            console.log(data.tos_accepted);
+            console.log(data.url);
             if (data.tos_accepted == false) { // print
                 $('#toserrorAlert').show();
             }
             else if (data.error != "") { // ad did not publish
 
                 if (data.url) { // print no credit card error message
+                    console.log("data url");
                     $('#errorAlertLink a').attr('href', data.url); // print facebook-specific error message
                     $('#errorAlertLink').show(); // print facebook-specific error message
                 }
                 else {
+                    console.log("else:");
                     $('#errorAlert').text(data.error).show(); // print facebook-specific error message
                 }
             }
