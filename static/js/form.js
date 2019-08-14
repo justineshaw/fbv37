@@ -1,3 +1,17 @@
+// preloader page
+$(window).on('load', function() {
+   var myDiv = document.getElementById("preloader");
+   //var myDiv = $('#preloader')
+   console.log(myDiv);
+   hide = function() {
+       //myDiv.fadeOut();
+       // style.display = "none"
+       $("#preloader").fadeOut();
+   }
+   setTimeout(hide, 4000);
+
+});
+
 // update iFrame
 $(document).ready(function() {
 

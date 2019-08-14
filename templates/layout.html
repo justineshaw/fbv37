@@ -139,6 +139,79 @@
           border: none !important;
         }
 
+        #preloader {
+           position: absolute;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           z-index: 9999;
+           background-image: linear-gradient(to bottom right, #7093B5, #C79031);
+           background-repeat: no-repeat;
+           background-color: #FFF;
+           background-position: center;
+        }
+
+        #preloader .image1 {
+            width: 100%;
+            top: 50px;
+            height: 600px;
+            background-image: url("https://drive.google.com/uc?id=127lq900QVFEaecNB7A-10N3Jfa6MFjUj");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: 100% 100%;
+            animation: right_to_left 3s;
+            position: absolute;
+            transform: rotate(10deg);
+        }
+
+        #preloader .text {
+            width: 50%;
+            top: 300px;
+            /*animation: left_to_right 4s ease;*/
+            height: 400px;
+            position: absolute;
+            animation: fadein 2s;
+        }
+        /*
+        #preloader .image2 {
+            width: 100%;
+            display: block;
+            margin-left: auto;
+            top: 100px;
+            height: 100px;
+            background-image: url("https://drive.google.com/uc?id=1oxeszT4izw1VpMYjWL0pTRJv7Lq-2SCY");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            animation: left_to_right 4s ease;
+            position: absolute;
+        }
+        */
+        @keyframes fadein {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        @keyframes left_to_right {
+          from {
+            margin-left: -200%;
+          }
+          to {
+            margin-left: 0;
+          }
+        }
+
+        @keyframes right_to_left {
+            from {
+              margin-left: 100%;
+            }
+            to {
+              margin-left: 0%;
+            }
+        }
+
+
 
         /* colors for brand */
         nav .navbar-brand .darkblue

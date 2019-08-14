@@ -143,11 +143,19 @@
 {% block col2 %}
 <div class="container" id="lead_ad_preview_div" style="display:block;">
     <!-- alerts -->
-    <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;">Error.</div>
-    <div id="errorAlertLink" class="alert alert-danger" role="alert" style="display:none;">Please add a valid payment method to your Facebook ad account: <a href="https://www.facebook.com/ads/leadgen/tos" id="tos_link" class="alert-link" target="_blank">Link</a></div>
+    <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;">Error. Please try again in a few minutes.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div id="errorAlertLink" class="alert alert-danger" role="alert" style="display:none;">Please add a valid payment method to your Facebook ad account: <a href="https://www.facebook.com/ads/leadgen/tos" id="tos_link" class="alert-link" target="_blank">Link</a>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
     <div id="successAlert" class="alert alert-success" role="alert" style="display:none;">Your ad succesfully published!</div>
     <div id="toserrorAlert" class="alert alert-danger alert-dismissible fade show" role="alert" style="display:none;">
-      Error: You haven't accepted Facebook's Lead Ads Terms for this page. <a href="https://www.facebook.com/ads/leadgen/tos" id="tos_link" class="alert-link" target="_blank">View Terms</a>
+      You haven't accepted Facebook's Lead Ads Terms for this page. <a href="https://www.facebook.com/ads/leadgen/tos" id="tos_link" class="alert-link" target="_blank">View Terms</a>
       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
