@@ -14,7 +14,7 @@ cffi==1.11.5
 chardet==3.0.4
 Click==7.0
 cloudinary==1.17.0
-cryptography==2.7
+cryptography==3.2
 cs50==2.4.4
 cssselect2==0.2.1
 curlify==2.1.1
