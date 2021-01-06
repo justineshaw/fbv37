@@ -7,7 +7,7 @@ boto3==1.9.140
 botocore==1.12.140
 bs4==0.0.1
 cairocffi==0.9.0
-CairoSVG==2.2.1
+CairoSVG==2.5.1
 certifi==2019.3.9
 cffi==1.11.5
 chardet==3.0.4
