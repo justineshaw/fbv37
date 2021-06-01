@@ -89,7 +89,7 @@ traitlets==4.3.2
 twilio==6.25.2
 twython==3.7.0
 typed-ast==1.1.0
-urllib3==1.23
+urllib3==1.26.5
 virtualenv==16.0.0
 WeasyPrint==0.42.3
 webencodings==0.5.1
