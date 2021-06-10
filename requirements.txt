@@ -21,7 +21,7 @@ curlify==2.1.1
 DateTime==4.3
 decorator==4.3.0
 defusedxml==0.5.0
-Django==2.1.1
+Django==2.2.24
 docutils==0.14
 EditorConfig==0.12.2
 facebook-business==3.2.8
