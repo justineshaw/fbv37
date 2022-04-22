@@ -74,7 +74,7 @@ pylint==1.9.3
 pylint-flask==0.5
 pylint-plugin-utils==0.4
 pyOpenSSL==19.0.0
-PyPDF2==1.26.0
+PyPDF2==1.27.5
 Pyphen==0.9.5
 PySocks==1.6.8
 python-dateutil==2.8.0
